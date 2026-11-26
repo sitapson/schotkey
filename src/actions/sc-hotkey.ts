@@ -51,6 +51,8 @@ type HotkeySettings = {
 	icon?: HotkeyIcon | "auto";
 	/** Background while a system is moving (DEPLOYING, RETRACTING…). */
 	busyColor?: string;
+	/** Background when there's no telemetry for this button. */
+	offlineColor?: string;
 };
 
 type Phase = HotkeyPhase;
@@ -271,7 +273,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		else if (phase === "off" && s.offImage) image = s.offImage;
 		else {
 			const color =
-				phase === "offline" ? "#2a3038"
+				phase === "offline" ? (s.offlineColor ?? "#2a3038")
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
