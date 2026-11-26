@@ -6,6 +6,9 @@
 		<style>
 			details { margin: 12px 0 4px; }
 			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
+			.group { font-family: "Segoe UI", system-ui, sans-serif; margin: 14px 0 4px 2px; padding-top: 8px; border-top: 1px solid #3a3a3a; color: #e6e6e6; font-size: 9pt; font-weight: 600; }
+			.group:first-of-type { border-top: 0; padding-top: 0; margin-top: 4px; }
+			.group span { display: block; margin-top: 2px; color: #8e959c; font-weight: 400; font-size: 8pt; }
 		</style>
 	</head>
 	<body>
@@ -64,7 +67,26 @@
 		</sdpi-item>
 
 		<details>
-			<summary>Appearance: icon, labels, colours, images</summary>
+			<summary>Colours</summary>
+			<div class="group">When ON <span>gear down, lights on, powered…</span></div>
+			<sdpi-item label="Background"><sdpi-color setting="onColor" default="#1f7a3a"></sdpi-color></sdpi-item>
+			<sdpi-item label="Icon"><sdpi-color setting="onIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+
+			<div class="group">When OFF <span>gear up, lights off, unpowered…</span></div>
+			<sdpi-item label="Background"><sdpi-color setting="offColor" default="#3a434d"></sdpi-color></sdpi-item>
+			<sdpi-item label="Icon"><sdpi-color setting="offIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+
+			<div class="group">While moving <span>deploying, retracting</span></div>
+			<sdpi-item label="Background"><sdpi-color setting="busyColor" default="#8a6414"></sdpi-color></sdpi-item>
+			<sdpi-item label="Icon"><sdpi-color setting="busyIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+
+			<div class="group">Offline <span>no data from the game; icon uses the OFF icon colour, faded</span></div>
+			<sdpi-item label="Background"><sdpi-color setting="offlineColor" default="#2a3038"></sdpi-color></sdpi-item>
+			<sdpi-item label="Icon strength %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
+		</details>
+
+		<details>
+			<summary>Icon, labels and images</summary>
 			<sdpi-item label="Icon">
 				<sdpi-select setting="icon" default="auto">
 					<option value="auto">From the button choice</option>
@@ -87,18 +109,12 @@
 					<option value="power">Power</option>
 				</sdpi-select>
 			</sdpi-item>
-			<sdpi-item label="Working colour"><sdpi-color setting="busyColor" default="#8a6414"></sdpi-color></sdpi-item>
-			<sdpi-item label="Working icon colour"><sdpi-color setting="busyIconColor" default="#ffffff"></sdpi-color></sdpi-item>
-			<sdpi-item label="Offline colour"><sdpi-color setting="offlineColor" default="#2a3038"></sdpi-color></sdpi-item>
-			<sdpi-item label="Offline opacity %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
-			<sdpi-item label="ON label"><sdpi-textfield setting="onLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
-			<sdpi-item label="ON colour"><sdpi-color setting="onColor" default="#1f7a3a"></sdpi-color></sdpi-item>
-			<sdpi-item label="ON icon colour"><sdpi-color setting="onIconColor" default="#ffffff"></sdpi-color></sdpi-item>
-			<sdpi-item label="ON image"><sdpi-file setting="onImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
-			<sdpi-item label="OFF label"><sdpi-textfield setting="offLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
-			<sdpi-item label="OFF colour"><sdpi-color setting="offColor" default="#3a434d"></sdpi-color></sdpi-item>
-			<sdpi-item label="OFF icon colour"><sdpi-color setting="offIconColor" default="#ffffff"></sdpi-color></sdpi-item>
-			<sdpi-item label="OFF image"><sdpi-file setting="offImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+			<div class="group">Title text <span>used when "Show state as title" is ticked</span></div>
+			<sdpi-item label="When ON"><sdpi-textfield setting="onLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+			<sdpi-item label="When OFF"><sdpi-textfield setting="offLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+			<div class="group">Own images <span>replace the whole key; optional</span></div>
+			<sdpi-item label="When ON"><sdpi-file setting="onImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+			<sdpi-item label="When OFF"><sdpi-file setting="offImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
 		</details>
 
 		<details>

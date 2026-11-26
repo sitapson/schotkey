@@ -6,6 +6,9 @@
 		<style>
 			details { margin: 12px 0 4px; }
 			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
+			.group { font-family: "Segoe UI", system-ui, sans-serif; margin: 14px 0 4px 2px; padding-top: 8px; border-top: 1px solid #3a3a3a; color: #e6e6e6; font-size: 9pt; font-weight: 600; }
+			.group:first-of-type { border-top: 0; padding-top: 0; margin-top: 4px; }
+			.group span { display: block; margin-top: 2px; color: #8e959c; font-weight: 400; font-size: 8pt; }
 		</style>
 	</head>
 	<body>
@@ -41,15 +44,22 @@
 
 		<details>
 			<summary>Colours</summary>
+			<div class="group">Key</div>
 			<sdpi-item label="Background"><sdpi-color setting="bgColor" default="#13202a"></sdpi-color></sdpi-item>
-			<sdpi-item label="Gauge"><sdpi-color setting="gaugeColor" default="#3fd0c9"></sdpi-color></sdpi-item>
-			<sdpi-item label="At yellow %"><sdpi-color setting="warnColor" default="#f2c230"></sdpi-color></sdpi-item>
-			<sdpi-item label="At red %"><sdpi-color setting="alertColor" default="#ff4f4f"></sdpi-color></sdpi-item>
-			<sdpi-item label="Icon">
-				<sdpi-checkbox setting="iconFollows" default="true" label="Same colour as the gauge"></sdpi-checkbox>
+
+			<div class="group">Ring <span>colour of the lit segments at each level</span></div>
+			<sdpi-item label="Normal"><sdpi-color setting="gaugeColor" default="#3fd0c9"></sdpi-color></sdpi-item>
+			<sdpi-item label="Low (yellow %)"><sdpi-color setting="warnColor" default="#f2c230"></sdpi-color></sdpi-item>
+			<sdpi-item label="Critical (red %)"><sdpi-color setting="alertColor" default="#ff4f4f"></sdpi-color></sdpi-item>
+
+			<div class="group">Icon</div>
+			<sdpi-item label="Colour">
+				<sdpi-checkbox setting="iconFollows" default="true" label="Match the ring (changes with the level)"></sdpi-checkbox>
 			</sdpi-item>
-			<sdpi-item label="Icon colour"><sdpi-color setting="iconColor" default="#e9f2f6"></sdpi-color></sdpi-item>
-			<sdpi-item label="Offline opacity %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
+			<sdpi-item label="Fixed colour"><sdpi-color setting="iconColor" default="#e9f2f6"></sdpi-color></sdpi-item>
+
+			<div class="group">Offline <span>no data from the game; icon and text in their usual colour, faded</span></div>
+			<sdpi-item label="Strength %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
 		</details>
 
 		<details>
