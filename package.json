@@ -1,0 +1,38 @@
+{
+  "name": "sc-telemetry-deck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.sctelemetry.deck\"",
+    "typecheck": "tsc --noEmit",
+    "link": "streamdeck link com.sctelemetry.deck.sdPlugin",
+    "validate": "streamdeck validate com.sctelemetry.deck.sdPlugin",
+    "probe": "rollup -c && node dist/probe.js",
+    "fake-game": "node dev/fake-game-server.mjs",
+    "logs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/watch-logs.ps1",
+    "extract-schema": "node scripts/extract-schema.mjs",
+    "list-fields": "node scripts/list-fields.mjs"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "^3.0.0",
+    "@elgato/utils": "^0.7.0",
+    "@grpc/grpc-js": "^1.12.0",
+    "protobufjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "@elgato/cli": "^1.0.0",
+    "@grpc/proto-loader": "^0.8.1",
+    "@grpc/reflection": "^1.0.4",
+    "@rollup/plugin-commonjs": "^28.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.3.0",
+    "@rollup/plugin-typescript": "^12.1.0",
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^24.0.0",
+    "rollup": "^4.24.0",
+    "tslib": "^2.8.0",
+    "typescript": "^5.6.0"
+  }
+}

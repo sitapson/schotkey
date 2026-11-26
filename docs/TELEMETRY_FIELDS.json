@@ -1,0 +1,922 @@
+{
+ "method": "sc.game.telemetry.v1.GameTelemetryService/TelemetryStream",
+ "sampleCount": 49,
+ "sections": [
+  {
+   "key": "vehicle",
+   "title": "Vehicle",
+   "rows": [
+    {
+     "path": "vehicle.state.name",
+     "type": "string",
+     "example": "\"RSI_Hermes_…\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.class_name",
+     "type": "string",
+     "example": "\"RSI_Hermes\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.manufacturer",
+     "type": "string",
+     "example": "\"\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.type",
+     "type": "enum VehicleType",
+     "example": "\"VEHICLE_TYPE_SPACESHIP\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.lights_enabled",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.doors.open_state",
+     "type": "enum VehicleDoorState.DoorOpenState",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.doors.lock_state",
+     "type": "enum VehicleDoorState.DoorLockState",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.pwr",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.wpn",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.thr",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.shld",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_OFF\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.cool",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_OFF\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.qdrv",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.radr",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.prox",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.hit",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.annunciators.misl",
+     "type": "enum VehicleAnnunciator.AnnunciatorState",
+     "example": "\"ANNUNCIATOR_STATE_NOMINAL\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.state.is_landed",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.state.gear",
+     "type": "enum VehicleComponentDeploymentState",
+     "example": "\"VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYED\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.state.vtol",
+     "type": "enum VehicleComponentDeploymentState",
+     "example": "\"VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYED\"",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.state.transformation",
+     "type": "enum VehicleComponentDeploymentState",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_coupled.enabled",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_coupled.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_esp.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_esp.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_gravity_compensation.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_gravity_compensation.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_g_safe.enabled",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_g_safe.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_cruise_mode.enabled",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_cruise_mode.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_spacebreak_enables_boost",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_speed_limiter.enabled",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_speed_limiter.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_proximity_assist.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_proximity_assist.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_proximity_assist_landing.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_proximity_assist_landing.active",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_stability.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_stability.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_core.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_core.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.advanced_hud_enabled_scm",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.advanced_hud_enabled_nav",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.advanced_hud_labels",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.course_prediction",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_wind_compensation.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_wind_compensation.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_g_safe_disabled_by_boost",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_command_behaviour.enabled",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.ifcs_command_behaviour.active",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.settings.flight_light_amplification",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.speed",
+     "type": "float",
+     "example": "2.641123444391269e-7",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.hydrogen_fuel",
+     "type": "float",
+     "example": "0.9366082549095154",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.quantum_fuel",
+     "type": "float",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.g_meter.current",
+     "type": "float",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.g_meter.max",
+     "type": "float",
+     "example": "3.174652099609375",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.boost.engaged",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.boost.output",
+     "type": "float",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.boost.reserves",
+     "type": "float",
+     "example": "1",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.boost.critical",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.altitude",
+     "type": "float",
+     "example": "3.4028234663852886e+38",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.radar_altitude",
+     "type": "float",
+     "example": "7.207199573516846",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.vertical_speed_indicator",
+     "type": "float",
+     "example": "2.641123444391269e-7",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.atmospheric_density",
+     "type": "float",
+     "example": "1.1999913454055786",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.flight.instruments.heading",
+     "type": "float",
+     "example": "359.9947204589844",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.powerplants",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.engines",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.weapons",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.coolers",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.life_support",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.gravity_generators",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.sensors",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.shield_generators",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "vehicle.state.power.shield_emitters",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "key": "weapons",
+   "title": "Weapons",
+   "rows": [
+    {
+     "path": "weapons.settings.fallback_convergence_distance",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.magnified_ui",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.precision_lines",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.staggered_fire",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.use_lag_pips",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.use_single_pips",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.use_fading_pips",
+     "type": "bool",
+     "example": "false",
+     "note": ""
+    },
+    {
+     "path": "weapons.settings.gimbals_locked",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.preset_index",
+     "type": "uint32",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "weapons.preset_name",
+     "type": "string",
+     "example": "\"\"",
+     "note": ""
+    },
+    {
+     "path": "weapons.weapons.N",
+     "type": "list of WeaponState",
+     "note": "N = 0, 1, 2…"
+    },
+    {
+     "path": "weapons.weapons.N.name",
+     "type": "string",
+     "example": "\"KLWE_LaserRepeater_S4_…\"",
+     "note": ""
+    },
+    {
+     "path": "weapons.weapons.N.is_powered",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.weapons.N.ready_to_fire",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.weapons.N.contained_in_preset",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    },
+    {
+     "path": "weapons.countermeasures.N",
+     "type": "list of Countermeasures",
+     "note": "N = 0, 1, 2…"
+    },
+    {
+     "path": "weapons.countermeasures.N.type",
+     "type": "enum Countermeasures.CountermeasureType",
+     "example": "\"COUNTERMEASURE_TYPE_DECOY\"",
+     "note": ""
+    },
+    {
+     "path": "weapons.countermeasures.N.amount",
+     "type": "uint32",
+     "example": "48",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "key": "events",
+   "title": "Events",
+   "rows": [
+    {
+     "path": "events.events.N",
+     "type": "list of GameEvent",
+     "note": "N = 0, 1, 2…"
+    },
+    {
+     "path": "events.events.N.type",
+     "type": "enum GameEvent.GameEventType",
+     "example": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "key": "actor",
+   "title": "Player (actor)",
+   "rows": [
+    {
+     "path": "actor.vitals.health.current",
+     "type": "float",
+     "example": "100",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.health.max",
+     "type": "float",
+     "example": "100",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.oxygen.current",
+     "type": "float",
+     "example": "1",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.oxygen.max",
+     "type": "float",
+     "example": "1",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.hunger.current",
+     "type": "float",
+     "example": "80.45105743408203",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.hunger.max",
+     "type": "float",
+     "example": "100",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.thirst.current",
+     "type": "float",
+     "example": "50.5425910949707",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.thirst.max",
+     "type": "float",
+     "example": "100",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.body_temperature.current",
+     "type": "float",
+     "example": "36.5",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.body_temperature.max",
+     "type": "float",
+     "example": "100",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.heart_rate",
+     "type": "float",
+     "example": "60.26496124267578",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.gravity",
+     "type": "float",
+     "example": "1.0003416538238525",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.pressure",
+     "type": "float",
+     "example": "1",
+     "note": ""
+    },
+    {
+     "path": "actor.vitals.intoxication_level",
+     "type": "int32",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "actor.state.locomotion",
+     "type": "enum ActorLocomotionState",
+     "example": "\"ACTOR_LOCOMOTION_STATE_SEATED\"",
+     "note": ""
+    },
+    {
+     "path": "actor.state.crew_role",
+     "type": "enum ActorCrewRole",
+     "example": "\"ACTOR_CREW_ROLE_PILOT\"",
+     "note": ""
+    },
+    {
+     "path": "actor.state.seat_name",
+     "type": "string",
+     "example": "\"RSI_Hermes_SeatDashboard_Pilot_…\"",
+     "note": ""
+    },
+    {
+     "path": "actor.state.uec_balance",
+     "type": "int64",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "actor.environment.external_temperature",
+     "type": "float",
+     "example": "20.9999942779541",
+     "note": ""
+    },
+    {
+     "path": "actor.environment.ambient_radiation_rate",
+     "type": "float",
+     "example": "0",
+     "note": ""
+    },
+    {
+     "path": "actor.environment.breathable_atmosphere",
+     "type": "bool",
+     "example": "true",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "key": "force_feedback",
+   "title": "Force feedback",
+   "rows": [
+    {
+     "path": "force_feedback.angular.x.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.angular.x.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.angular.y.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.angular.y.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.angular.z.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.angular.z.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.x.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.x.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.y.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.y.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.z.resistance",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.linear.z.damping",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.gunfire",
+     "type": "float",
+     "example": "",
+     "note": ""
+    },
+    {
+     "path": "force_feedback.stick_shaker",
+     "type": "float",
+     "example": "",
+     "note": ""
+    }
+   ]
+  },
+  {
+   "key": "turret",
+   "title": "Turret",
+   "rows": [
+    {
+     "path": "turret.light_amplification",
+     "type": "bool",
+     "example": "",
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "enums": [
+  {
+   "name": "ActorCrewRole",
+   "prefix": "ACTOR_CREW_ROLE_",
+   "values": [
+    "UNSPECIFIED",
+    "PILOT",
+    "GUNNER",
+    "CREW"
+   ]
+  },
+  {
+   "name": "ActorLocomotionState",
+   "prefix": "ACTOR_LOCOMOTION_STATE_",
+   "values": [
+    "UNSPECIFIED",
+    "ON_FOOT",
+    "EVA",
+    "SEATED"
+   ]
+  },
+  {
+   "name": "Countermeasures.CountermeasureType",
+   "prefix": "COUNTERMEASURE_TYPE_",
+   "values": [
+    "UNSPECIFIED",
+    "DECOY",
+    "NOISE"
+   ]
+  },
+  {
+   "name": "GameEvent.GameEventType",
+   "prefix": "GAME_EVENT_TYPE_",
+   "values": [
+    "UNSPECIFIED",
+    "ACTOR_SPAWN",
+    "ACTOR_DEAD",
+    "ACTOR_ENTER_SEAT",
+    "ACTOR_LEAVE_SEAT",
+    "ACTOR_RESPAWN",
+    "ACTOR_DOWNED"
+   ]
+  },
+  {
+   "name": "VehicleAnnunciator.AnnunciatorState",
+   "prefix": "ANNUNCIATOR_STATE_",
+   "values": [
+    "UNSPECIFIED",
+    "NOMINAL",
+    "OFF",
+    "MINOR_FLASHING",
+    "MINOR_ON",
+    "MAJOR_FLASHING",
+    "MAJOR_ON"
+   ]
+  },
+  {
+   "name": "VehicleComponentDeploymentState",
+   "prefix": "VEHICLE_COMPONENT_DEPLOYMENT_STATE_",
+   "values": [
+    "UNSPECIFIED",
+    "RETRACTED",
+    "DEPLOYING",
+    "DEPLOYED",
+    "RETRACTING"
+   ]
+  },
+  {
+   "name": "VehicleDoorState.DoorLockState",
+   "prefix": "DOOR_LOCK_STATE_",
+   "values": [
+    "UNSPECIFIED",
+    "UNLOCKED",
+    "LOCKED"
+   ]
+  },
+  {
+   "name": "VehicleDoorState.DoorOpenState",
+   "prefix": "DOOR_OPEN_STATE_",
+   "values": [
+    "UNSPECIFIED",
+    "OPENED",
+    "CLOSED"
+   ]
+  },
+  {
+   "name": "VehicleType",
+   "prefix": "VEHICLE_TYPE_",
+   "values": [
+    "UNSPECIFIED",
+    "SPACESHIP",
+    "GROUND",
+    "GRAVLEV",
+    "BOAT"
+   ]
+  }
+ ]
+}

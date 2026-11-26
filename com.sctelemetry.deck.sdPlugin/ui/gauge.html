@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+		<style>
+			details { margin: 12px 0 4px; }
+			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
+		</style>
+	</head>
+	<body>
+		<sdpi-item label="Gauge">
+			<sdpi-select setting="preset" placeholder="Choose what to show">
+				<option value="hydrogen">Hydrogen fuel</option>
+				<option value="quantum">Quantum fuel</option>
+				<option value="boost">Boost reserves</option>
+				<option value="oxygen">Oxygen</option>
+				<option value="health">Health</option>
+				<option value="custom">Custom (choose a field below)</option>
+			</sdpi-select>
+		</sdpi-item>
+		<sdpi-item label="Key to press">
+			<sdpi-textfield setting="keys" placeholder="Optional, e.g. I for engine power"></sdpi-textfield>
+		</sdpi-item>
+
+		<sdpi-item label="Segments">
+			<sdpi-range setting="segments" min="1" max="24" step="1" default="10" showlabels></sdpi-range>
+		</sdpi-item>
+		<sdpi-item label="Partial fill">
+			<sdpi-checkbox setting="partial" default="true" label="Partly fill the last segment"></sdpi-checkbox>
+		</sdpi-item>
+		<sdpi-item label="Yellow at or below %">
+			<sdpi-textfield setting="warnAt" default="50" pattern="[0-9.]*"></sdpi-textfield>
+		</sdpi-item>
+		<sdpi-item label="Red at or below %">
+			<sdpi-textfield setting="alertAt" default="15" pattern="[0-9.]*"></sdpi-textfield>
+		</sdpi-item>
+		<sdpi-item label="Check it worked">
+			<sdpi-checkbox setting="verify" default="true" label="Show ⚠ if the press changed nothing"></sdpi-checkbox>
+		</sdpi-item>
+
+		<details>
+			<summary>Colours</summary>
+			<sdpi-item label="Background"><sdpi-color setting="bgColor" default="#13202a"></sdpi-color></sdpi-item>
+			<sdpi-item label="Gauge"><sdpi-color setting="gaugeColor" default="#3fd0c9"></sdpi-color></sdpi-item>
+			<sdpi-item label="At yellow %"><sdpi-color setting="warnColor" default="#f2c230"></sdpi-color></sdpi-item>
+			<sdpi-item label="At red %"><sdpi-color setting="alertColor" default="#ff4f4f"></sdpi-color></sdpi-item>
+			<sdpi-item label="Icon">
+				<sdpi-checkbox setting="iconFollows" default="true" label="Same colour as the gauge"></sdpi-checkbox>
+			</sdpi-item>
+			<sdpi-item label="Icon colour"><sdpi-color setting="iconColor" default="#e9f2f6"></sdpi-color></sdpi-item>
+		</details>
+
+		<details>
+			<summary>Advanced: custom field and display</summary>
+			<sdpi-item label="Telemetry field">
+				<sdpi-select setting="field" datasource="getFields" hot-reload show-refresh placeholder="Only used with Custom"></sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="Icon">
+				<sdpi-select setting="icon" placeholder="Only used with Custom">
+					<option value="hydrogen">Hydrogen</option>
+					<option value="quantum">Quantum</option>
+					<option value="boost">Boost</option>
+					<option value="oxygen">Oxygen</option>
+					<option value="health">Health</option>
+					<option value="none">None</option>
+				</sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="Empty value">
+				<sdpi-textfield setting="min" placeholder="0"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Full value">
+				<sdpi-textfield setting="max" placeholder="1"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Show">
+				<sdpi-select setting="display" default="percent">
+					<option value="percent">Percentage</option>
+					<option value="value">Raw value with unit</option>
+				</sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="Unit">
+				<sdpi-textfield setting="unit" placeholder="m/s, G, m…"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Decimals">
+				<sdpi-textfield setting="decimals" placeholder="0"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="State field">
+				<sdpi-select setting="stateField" datasource="getStateFields" hot-reload show-refresh placeholder="Only used with Custom"></sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="ON when value is">
+				<sdpi-textfield setting="stateOnValues" placeholder="blank = true / non-zero"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Text when OFF">
+				<sdpi-textfield setting="offLabel" placeholder="OFF (hydrogen: ENG OFF)" maxlength="9"></sdpi-textfield>
+			</sdpi-item>
+		</details>
+	</body>
+</html>

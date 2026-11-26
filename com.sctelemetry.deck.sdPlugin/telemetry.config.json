@@ -1,0 +1,9 @@
+{
+  "address": "127.0.0.1:2942",
+  "method": "",
+  "request": {},
+  "protoFile": "schema/telemetry.protoset",
+  "pollMs": 100,
+  "reconnectMs": 3000,
+  "debug": true
+}

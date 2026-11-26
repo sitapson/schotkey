@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+		<style>
+			details { margin: 12px 0 4px; }
+			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
+		</style>
+	</head>
+	<body>
+		<sdpi-item label="Button">
+			<sdpi-select setting="preset" placeholder="Choose what this key controls">
+				<optgroup label="Ship">
+					<option value="gear">Landing gear</option>
+					<option value="lights">Lights</option>
+					<option value="vtol">VTOL</option>
+					<option value="boost">Boost</option>
+				</optgroup>
+				<optgroup label="Power">
+					<option value="engines">Engine power</option>
+					<option value="shields">Shield power</option>
+					<option value="weapons">Weapon power</option>
+					<option value="coolers">Cooler power</option>
+					<option value="quantum">Quantum drive power</option>
+				</optgroup>
+				<optgroup label="Flight modes">
+					<option value="coupled">Coupled / decoupled</option>
+					<option value="cruise">Cruise control</option>
+					<option value="limiter">Speed limiter</option>
+					<option value="gsafe">G-safe</option>
+					<option value="gimbals">Gimbal lock</option>
+				</optgroup>
+				<option value="custom">Custom (choose a field below)</option>
+			</sdpi-select>
+		</sdpi-item>
+		<sdpi-item label="Key to press">
+			<sdpi-textfield setting="keys" placeholder="Your keybind, e.g. N or LAlt+N"></sdpi-textfield>
+		</sdpi-item>
+		<sdpi-item label="Press">
+			<sdpi-select setting="pressMode" default="tap">
+				<option value="tap">Tap</option>
+				<option value="hold">Hold while pressed</option>
+				<option value="long">Long press</option>
+			</sdpi-select>
+		</sdpi-item>
+		<sdpi-item label="Only press if">
+			<sdpi-select setting="ensure" default="none">
+				<option value="none">Always press (toggle)</option>
+				<option value="on">Not already ON</option>
+				<option value="off">Not already OFF</option>
+			</sdpi-select>
+		</sdpi-item>
+		<sdpi-item label="Check it worked">
+			<sdpi-checkbox setting="verify" default="true" label="Show ⚠ if the press changed nothing"></sdpi-checkbox>
+		</sdpi-item>
+
+		<details>
+			<summary>Appearance: labels, colours, images</summary>
+			<sdpi-item label="ON label"><sdpi-textfield setting="onLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+			<sdpi-item label="ON colour"><sdpi-color setting="onColor" default="#1f7a3a"></sdpi-color></sdpi-item>
+			<sdpi-item label="ON image"><sdpi-file setting="onImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+			<sdpi-item label="OFF label"><sdpi-textfield setting="offLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+			<sdpi-item label="OFF colour"><sdpi-color setting="offColor" default="#3a434d"></sdpi-color></sdpi-item>
+			<sdpi-item label="OFF image"><sdpi-file setting="offImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+		</details>
+
+		<details>
+			<summary>Advanced: custom field</summary>
+			<sdpi-item label="Telemetry field">
+				<sdpi-select setting="field" datasource="getFields" hot-reload show-refresh placeholder="Only used with Custom"></sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="ON when value is">
+				<sdpi-textfield setting="onValues" placeholder="blank = true / non-zero.  e.g.  DEPLOYED, DEPLOYING"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Long press ms">
+				<sdpi-range setting="longMs" min="300" max="3000" step="100" default="1000" showlabels></sdpi-range>
+			</sdpi-item>
+			<sdpi-item label="Show value">
+				<sdpi-checkbox setting="showValue" label="Print the live value on the key"></sdpi-checkbox>
+			</sdpi-item>
+		</details>
+	</body>
+</html>

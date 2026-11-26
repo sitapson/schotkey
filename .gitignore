@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.sdPlugin/bin/
+*.sdPlugin/logs/
+*.sdPlugin/snapshots/
+probe-output/
+# Built packages and snapshot zips; rebuild any version from its git tag.
+releases/

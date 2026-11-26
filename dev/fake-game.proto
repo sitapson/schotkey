@@ -1,0 +1,39 @@
+// A MADE-UP telemetry service for developing without the game running.
+// Field names are invented; replace with what `npm run probe` finds in the real feed.
+syntax = "proto3";
+package fake.sc;
+
+import "google/protobuf/timestamp.proto";
+
+service Telemetry {
+  rpc Subscribe(SubscribeRequest) returns (stream Frame);
+  rpc GetSnapshot(SubscribeRequest) returns (Frame);
+  // Looks state-changing: the probe must NOT call this.
+  rpc ExecuteAction(ActionRequest) returns (ActionResult);
+}
+
+message SubscribeRequest { uint32 rate_hz = 1; }
+message ActionRequest { string action = 1; }
+message ActionResult { bool ok = 1; }
+
+enum GearState { GEAR_UNKNOWN = 0; GEAR_UP = 1; GEAR_MOVING = 2; GEAR_DOWN = 3; }
+enum FlightMode { MODE_UNKNOWN = 0; SCM = 1; NAV = 2; QUANTUM = 3; }
+
+message Ship {
+  string name = 1;
+  GearState landing_gear = 2;
+  bool lights = 3;
+  bool vtol = 4;
+  FlightMode mode = 5;
+  float shields_pct = 6;
+  float hydrogen_fuel_pct = 7;
+  float quantum_fuel_pct = 8;
+  bool power_on = 9;
+  repeated string warnings = 10;
+}
+
+message Frame {
+  google.protobuf.Timestamp time = 1;
+  bool seated = 2;
+  Ship ship = 3;
+}

@@ -1,0 +1,827 @@
+{
+  "nested": {
+    "sc": {
+      "nested": {
+        "game": {
+          "nested": {
+            "telemetry": {
+              "nested": {
+                "v1": {
+                  "nested": {
+                    "Availability": {
+                      "fields": {
+                        "enabled": {
+                          "type": "bool",
+                          "id": 1
+                        },
+                        "active": {
+                          "type": "bool",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Gauge": {
+                      "fields": {
+                        "current": {
+                          "type": "float",
+                          "id": 1
+                        },
+                        "max": {
+                          "type": "float",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "VehicleDoorState": {
+                      "fields": {
+                        "open_state": {
+                          "type": ".sc.game.telemetry.v1.VehicleDoorState.DoorOpenState",
+                          "id": 1
+                        },
+                        "lock_state": {
+                          "type": ".sc.game.telemetry.v1.VehicleDoorState.DoorLockState",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "DoorOpenState": {
+                          "values": {
+                            "DOOR_OPEN_STATE_UNSPECIFIED": 0,
+                            "DOOR_OPEN_STATE_OPENED": 1,
+                            "DOOR_OPEN_STATE_CLOSED": 2
+                          }
+                        },
+                        "DoorLockState": {
+                          "values": {
+                            "DOOR_LOCK_STATE_UNSPECIFIED": 0,
+                            "DOOR_LOCK_STATE_UNLOCKED": 1,
+                            "DOOR_LOCK_STATE_LOCKED": 2
+                          }
+                        }
+                      }
+                    },
+                    "VehicleFlightSettings": {
+                      "fields": {
+                        "ifcs_coupled": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 1
+                        },
+                        "ifcs_esp": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 2
+                        },
+                        "ifcs_gravity_compensation": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 3
+                        },
+                        "ifcs_g_safe": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 4
+                        },
+                        "ifcs_cruise_mode": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 5
+                        },
+                        "ifcs_spacebreak_enables_boost": {
+                          "type": "bool",
+                          "id": 6
+                        },
+                        "ifcs_speed_limiter": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 7
+                        },
+                        "ifcs_proximity_assist": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 8
+                        },
+                        "ifcs_proximity_assist_landing": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 9
+                        },
+                        "ifcs_stability": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 10
+                        },
+                        "ifcs_core": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 11
+                        },
+                        "advanced_hud_enabled_scm": {
+                          "type": "bool",
+                          "id": 12
+                        },
+                        "advanced_hud_enabled_nav": {
+                          "type": "bool",
+                          "id": 13
+                        },
+                        "advanced_hud_labels": {
+                          "type": "bool",
+                          "id": 14
+                        },
+                        "course_prediction": {
+                          "type": "bool",
+                          "id": 15
+                        },
+                        "ifcs_wind_compensation": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 16
+                        },
+                        "ifcs_g_safe_disabled_by_boost": {
+                          "type": "bool",
+                          "id": 17
+                        },
+                        "ifcs_command_behaviour": {
+                          "type": ".sc.game.telemetry.v1.Availability",
+                          "id": 18
+                        },
+                        "flight_light_amplification": {
+                          "type": "bool",
+                          "id": 19
+                        }
+                      }
+                    },
+                    "VehicleFlightState": {
+                      "oneofs": {
+                        "_gear": {
+                          "oneof": [
+                            "gear"
+                          ]
+                        },
+                        "_vtol": {
+                          "oneof": [
+                            "vtol"
+                          ]
+                        },
+                        "_transformation": {
+                          "oneof": [
+                            "transformation"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "is_landed": {
+                          "type": "bool",
+                          "id": 1
+                        },
+                        "gear": {
+                          "type": ".sc.game.telemetry.v1.VehicleComponentDeploymentState",
+                          "id": 2
+                        },
+                        "vtol": {
+                          "type": ".sc.game.telemetry.v1.VehicleComponentDeploymentState",
+                          "id": 3
+                        },
+                        "transformation": {
+                          "type": ".sc.game.telemetry.v1.VehicleComponentDeploymentState",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "VehicleFlight": {
+                      "fields": {
+                        "state": {
+                          "type": ".sc.game.telemetry.v1.VehicleFlightState",
+                          "id": 1
+                        },
+                        "settings": {
+                          "type": ".sc.game.telemetry.v1.VehicleFlightSettings",
+                          "id": 2
+                        },
+                        "instruments": {
+                          "type": ".sc.game.telemetry.v1.VehicleFlightInstruments",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "VehicleFlightInstruments": {
+                      "oneofs": {
+                        "_g_meter": {
+                          "oneof": [
+                            "g_meter"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "speed": {
+                          "type": "float",
+                          "id": 1
+                        },
+                        "hydrogen_fuel": {
+                          "type": "float",
+                          "id": 2
+                        },
+                        "quantum_fuel": {
+                          "type": "float",
+                          "id": 3
+                        },
+                        "g_meter": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 4
+                        },
+                        "boost": {
+                          "type": ".sc.game.telemetry.v1.VehicleThrusterBoost",
+                          "id": 5
+                        },
+                        "altitude": {
+                          "type": "float",
+                          "id": 6
+                        },
+                        "radar_altitude": {
+                          "type": "float",
+                          "id": 7
+                        },
+                        "vertical_speed_indicator": {
+                          "type": "float",
+                          "id": 8
+                        },
+                        "atmospheric_density": {
+                          "type": "float",
+                          "id": 9
+                        },
+                        "heading": {
+                          "type": "float",
+                          "id": 10
+                        }
+                      }
+                    },
+                    "VehicleThrusterBoost": {
+                      "fields": {
+                        "engaged": {
+                          "type": "bool",
+                          "id": 1
+                        },
+                        "output": {
+                          "type": "float",
+                          "id": 2
+                        },
+                        "reserves": {
+                          "type": "float",
+                          "id": 3
+                        },
+                        "critical": {
+                          "type": "bool",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "VehiclePowerState": {
+                      "fields": {
+                        "powerplants": {
+                          "type": "bool",
+                          "id": 1
+                        },
+                        "engines": {
+                          "type": "bool",
+                          "id": 2
+                        },
+                        "weapons": {
+                          "type": "bool",
+                          "id": 3
+                        },
+                        "coolers": {
+                          "type": "bool",
+                          "id": 4
+                        },
+                        "life_support": {
+                          "type": "bool",
+                          "id": 5
+                        },
+                        "gravity_generators": {
+                          "type": "bool",
+                          "id": 6
+                        },
+                        "sensors": {
+                          "type": "bool",
+                          "id": 7
+                        },
+                        "shield_generators": {
+                          "type": "bool",
+                          "id": 8
+                        },
+                        "shield_emitters": {
+                          "type": "bool",
+                          "id": 9
+                        }
+                      }
+                    },
+                    "VehicleAnnunciator": {
+                      "fields": {
+                        "pwr": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 1
+                        },
+                        "wpn": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 2
+                        },
+                        "thr": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 3
+                        },
+                        "shld": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 4
+                        },
+                        "cool": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 5
+                        },
+                        "qdrv": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 6
+                        },
+                        "radr": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 7
+                        },
+                        "prox": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 8
+                        },
+                        "hit": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 9
+                        },
+                        "misl": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator.AnnunciatorState",
+                          "id": 10
+                        }
+                      },
+                      "nested": {
+                        "AnnunciatorState": {
+                          "values": {
+                            "ANNUNCIATOR_STATE_UNSPECIFIED": 0,
+                            "ANNUNCIATOR_STATE_NOMINAL": 1,
+                            "ANNUNCIATOR_STATE_OFF": 2,
+                            "ANNUNCIATOR_STATE_MINOR_FLASHING": 3,
+                            "ANNUNCIATOR_STATE_MINOR_ON": 4,
+                            "ANNUNCIATOR_STATE_MAJOR_FLASHING": 5,
+                            "ANNUNCIATOR_STATE_MAJOR_ON": 6
+                          }
+                        }
+                      }
+                    },
+                    "VehicleState": {
+                      "oneofs": {
+                        "_doors": {
+                          "oneof": [
+                            "doors"
+                          ]
+                        },
+                        "_annunciators": {
+                          "oneof": [
+                            "annunciators"
+                          ]
+                        },
+                        "_flight": {
+                          "oneof": [
+                            "flight"
+                          ]
+                        },
+                        "_power": {
+                          "oneof": [
+                            "power"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "class_name": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "manufacturer": {
+                          "type": "string",
+                          "id": 3
+                        },
+                        "type": {
+                          "type": ".sc.game.telemetry.v1.VehicleType",
+                          "id": 4
+                        },
+                        "lights_enabled": {
+                          "type": "bool",
+                          "id": 5
+                        },
+                        "doors": {
+                          "type": ".sc.game.telemetry.v1.VehicleDoorState",
+                          "id": 6
+                        },
+                        "annunciators": {
+                          "type": ".sc.game.telemetry.v1.VehicleAnnunciator",
+                          "id": 7
+                        },
+                        "flight": {
+                          "type": ".sc.game.telemetry.v1.VehicleFlight",
+                          "id": 8
+                        },
+                        "power": {
+                          "type": ".sc.game.telemetry.v1.VehiclePowerState",
+                          "id": 9
+                        }
+                      }
+                    },
+                    "VehicleFrame": {
+                      "fields": {
+                        "state": {
+                          "type": ".sc.game.telemetry.v1.VehicleState",
+                          "id": 2
+                        }
+                      },
+                      "reserved": [
+                        [
+                          1,
+                          2
+                        ]
+                      ]
+                    },
+                    "WeaponsSettings": {
+                      "fields": {
+                        "fallback_convergence_distance": {
+                          "type": "bool",
+                          "id": 1
+                        },
+                        "magnified_ui": {
+                          "type": "bool",
+                          "id": 2
+                        },
+                        "precision_lines": {
+                          "type": "bool",
+                          "id": 3
+                        },
+                        "staggered_fire": {
+                          "type": "bool",
+                          "id": 4
+                        },
+                        "use_lag_pips": {
+                          "type": "bool",
+                          "id": 5
+                        },
+                        "use_single_pips": {
+                          "type": "bool",
+                          "id": 6
+                        },
+                        "use_fading_pips": {
+                          "type": "bool",
+                          "id": 7
+                        },
+                        "gimbals_locked": {
+                          "type": "bool",
+                          "id": 8
+                        }
+                      }
+                    },
+                    "WeaponState": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "is_powered": {
+                          "type": "bool",
+                          "id": 2
+                        },
+                        "ready_to_fire": {
+                          "type": "bool",
+                          "id": 3
+                        },
+                        "contained_in_preset": {
+                          "type": "bool",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "Countermeasures": {
+                      "fields": {
+                        "type": {
+                          "type": ".sc.game.telemetry.v1.Countermeasures.CountermeasureType",
+                          "id": 1
+                        },
+                        "amount": {
+                          "type": "uint32",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "CountermeasureType": {
+                          "values": {
+                            "COUNTERMEASURE_TYPE_UNSPECIFIED": 0,
+                            "COUNTERMEASURE_TYPE_DECOY": 1,
+                            "COUNTERMEASURE_TYPE_NOISE": 2
+                          }
+                        }
+                      }
+                    },
+                    "WeaponsFrame": {
+                      "fields": {
+                        "settings": {
+                          "type": ".sc.game.telemetry.v1.WeaponsSettings",
+                          "id": 1
+                        },
+                        "preset_index": {
+                          "type": "uint32",
+                          "id": 2
+                        },
+                        "preset_name": {
+                          "type": "string",
+                          "id": 3
+                        },
+                        "weapons": {
+                          "rule": "repeated",
+                          "type": ".sc.game.telemetry.v1.WeaponState",
+                          "id": 4
+                        },
+                        "countermeasures": {
+                          "rule": "repeated",
+                          "type": ".sc.game.telemetry.v1.Countermeasures",
+                          "id": 5
+                        }
+                      }
+                    },
+                    "GameEvent": {
+                      "fields": {
+                        "type": {
+                          "type": ".sc.game.telemetry.v1.GameEvent.GameEventType",
+                          "id": 1
+                        }
+                      },
+                      "nested": {
+                        "GameEventType": {
+                          "values": {
+                            "GAME_EVENT_TYPE_UNSPECIFIED": 0,
+                            "GAME_EVENT_TYPE_ACTOR_SPAWN": 1,
+                            "GAME_EVENT_TYPE_ACTOR_DEAD": 2,
+                            "GAME_EVENT_TYPE_ACTOR_ENTER_SEAT": 3,
+                            "GAME_EVENT_TYPE_ACTOR_LEAVE_SEAT": 4,
+                            "GAME_EVENT_TYPE_ACTOR_RESPAWN": 5,
+                            "GAME_EVENT_TYPE_ACTOR_DOWNED": 6
+                          }
+                        }
+                      }
+                    },
+                    "EventsFrame": {
+                      "fields": {
+                        "events": {
+                          "rule": "repeated",
+                          "type": ".sc.game.telemetry.v1.GameEvent",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "AxisFeedback": {
+                      "fields": {
+                        "resistance": {
+                          "type": "float",
+                          "id": 1
+                        },
+                        "damping": {
+                          "type": "float",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "FeedbackAxes": {
+                      "fields": {
+                        "x": {
+                          "type": ".sc.game.telemetry.v1.AxisFeedback",
+                          "id": 1
+                        },
+                        "y": {
+                          "type": ".sc.game.telemetry.v1.AxisFeedback",
+                          "id": 2
+                        },
+                        "z": {
+                          "type": ".sc.game.telemetry.v1.AxisFeedback",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "ForceFeedbackFrame": {
+                      "fields": {
+                        "angular": {
+                          "type": ".sc.game.telemetry.v1.FeedbackAxes",
+                          "id": 2
+                        },
+                        "linear": {
+                          "type": ".sc.game.telemetry.v1.FeedbackAxes",
+                          "id": 3
+                        },
+                        "gunfire": {
+                          "type": "float",
+                          "id": 4
+                        },
+                        "stick_shaker": {
+                          "type": "float",
+                          "id": 5
+                        }
+                      },
+                      "reserved": [
+                        [
+                          1,
+                          2
+                        ]
+                      ]
+                    },
+                    "ActorVitals": {
+                      "fields": {
+                        "health": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 1
+                        },
+                        "oxygen": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 2
+                        },
+                        "hunger": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 3
+                        },
+                        "thirst": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 4
+                        },
+                        "body_temperature": {
+                          "type": ".sc.game.telemetry.v1.Gauge",
+                          "id": 5
+                        },
+                        "heart_rate": {
+                          "type": "float",
+                          "id": 7
+                        },
+                        "gravity": {
+                          "type": "float",
+                          "id": 8
+                        },
+                        "pressure": {
+                          "type": "float",
+                          "id": 9
+                        },
+                        "intoxication_level": {
+                          "type": "int32",
+                          "id": 10
+                        }
+                      },
+                      "reserved": [
+                        [
+                          6,
+                          7
+                        ]
+                      ]
+                    },
+                    "ActorEnvironment": {
+                      "fields": {
+                        "external_temperature": {
+                          "type": "float",
+                          "id": 1
+                        },
+                        "ambient_radiation_rate": {
+                          "type": "float",
+                          "id": 2
+                        },
+                        "breathable_atmosphere": {
+                          "type": "bool",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "ActorState": {
+                      "fields": {
+                        "locomotion": {
+                          "type": ".sc.game.telemetry.v1.ActorLocomotionState",
+                          "id": 1
+                        },
+                        "crew_role": {
+                          "type": ".sc.game.telemetry.v1.ActorCrewRole",
+                          "id": 2
+                        },
+                        "seat_name": {
+                          "type": "string",
+                          "id": 3
+                        },
+                        "uec_balance": {
+                          "type": "int64",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "ActorFrame": {
+                      "fields": {
+                        "vitals": {
+                          "type": ".sc.game.telemetry.v1.ActorVitals",
+                          "id": 1
+                        },
+                        "state": {
+                          "type": ".sc.game.telemetry.v1.ActorState",
+                          "id": 2
+                        },
+                        "environment": {
+                          "type": ".sc.game.telemetry.v1.ActorEnvironment",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "TurretFrame": {
+                      "fields": {
+                        "light_amplification": {
+                          "type": "bool",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "VehicleComponentDeploymentState": {
+                      "values": {
+                        "VEHICLE_COMPONENT_DEPLOYMENT_STATE_UNSPECIFIED": 0,
+                        "VEHICLE_COMPONENT_DEPLOYMENT_STATE_RETRACTED": 1,
+                        "VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYING": 2,
+                        "VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYED": 3,
+                        "VEHICLE_COMPONENT_DEPLOYMENT_STATE_RETRACTING": 4
+                      }
+                    },
+                    "VehicleType": {
+                      "values": {
+                        "VEHICLE_TYPE_UNSPECIFIED": 0,
+                        "VEHICLE_TYPE_SPACESHIP": 1,
+                        "VEHICLE_TYPE_GROUND": 2,
+                        "VEHICLE_TYPE_GRAVLEV": 3,
+                        "VEHICLE_TYPE_BOAT": 4
+                      }
+                    },
+                    "ActorLocomotionState": {
+                      "values": {
+                        "ACTOR_LOCOMOTION_STATE_UNSPECIFIED": 0,
+                        "ACTOR_LOCOMOTION_STATE_ON_FOOT": 1,
+                        "ACTOR_LOCOMOTION_STATE_EVA": 2,
+                        "ACTOR_LOCOMOTION_STATE_SEATED": 3
+                      }
+                    },
+                    "ActorCrewRole": {
+                      "values": {
+                        "ACTOR_CREW_ROLE_UNSPECIFIED": 0,
+                        "ACTOR_CREW_ROLE_PILOT": 1,
+                        "ACTOR_CREW_ROLE_GUNNER": 2,
+                        "ACTOR_CREW_ROLE_CREW": 3
+                      }
+                    },
+                    "TelemetryStreamRequest": {
+                      "fields": {}
+                    },
+                    "TelemetryStreamResponse": {
+                      "fields": {
+                        "vehicle": {
+                          "type": ".sc.game.telemetry.v1.VehicleFrame",
+                          "id": 3
+                        },
+                        "weapons": {
+                          "type": ".sc.game.telemetry.v1.WeaponsFrame",
+                          "id": 4
+                        },
+                        "events": {
+                          "type": ".sc.game.telemetry.v1.EventsFrame",
+                          "id": 5
+                        },
+                        "actor": {
+                          "type": ".sc.game.telemetry.v1.ActorFrame",
+                          "id": 6
+                        },
+                        "force_feedback": {
+                          "type": ".sc.game.telemetry.v1.ForceFeedbackFrame",
+                          "id": 7
+                        },
+                        "turret": {
+                          "type": ".sc.game.telemetry.v1.TurretFrame",
+                          "id": 8
+                        }
+                      },
+                      "reserved": [
+                        [
+                          1,
+                          2
+                        ],
+                        [
+                          2,
+                          3
+                        ]
+                      ]
+                    },
+                    "GameTelemetryService": {
+                      "methods": {
+                        "TelemetryStream": {
+                          "requestType": ".sc.game.telemetry.v1.TelemetryStreamRequest",
+                          "responseType": ".sc.game.telemetry.v1.TelemetryStreamResponse",
+                          "responseStream": true,
+                          "options": {}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
