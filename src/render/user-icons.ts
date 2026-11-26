@@ -9,6 +9,7 @@ import { join } from "node:path";
 /** Which supplied file replaces which built-in icon. */
 export const USER_ICON_FILES: Record<string, string> = {
 	gear: "landing-gear.svg",
+	lights: "headlights.svg",
 };
 
 const PAGE = 89.0625;
@@ -31,7 +32,10 @@ function load(file: string): string | null {
 		svg = svg
 			.replace(/<\?xml[\s\S]*?\?>/g, "")
 			.replace(/<!--[\s\S]*?-->/g, "")
-			.replace(/<sodipodi:namedview[\s\S]*?(<\/sodipodi:namedview>|\/>)/g, "")
+			// Inkscape's settings block can contain child tags (<inkscape:page/>), so remove the
+			// whole paired block first, then any self-closing or stray editor tags left over.
+			.replace(/<sodipodi:namedview\b[\s\S]*?<\/sodipodi:namedview>/g, "")
+			.replace(/<\/?(sodipodi|inkscape):[^>]*>/g, "")
 			.replace(/<style[\s\S]*?<\/style>/g, "")
 			.replace(/<defs[\s\S]*?(<\/defs>|\/>)/g, "")
 			// Editor attributes use namespaces we drop, so they'd make the inlined XML invalid.
