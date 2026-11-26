@@ -2,8 +2,6 @@
  * Gauge key faces for a 144×144 Stream Deck key, as SVG data URLs. Six styles:
  *
  *   v1  Classic: 270° fuel ring (open at the bottom), icon inside, value text below.
- *   v2  Split: no text. Top half an arc of pips; bottom half, a little smaller, the fuel gauge
- *       filling left to right. Icon in the middle.
  *   v3  Double: fuel ring outside, pip arc inside; text below.
  *   v4  Double, swapped: pip arc outside, fuel ring inside; text below.
  *   v5  Ring + line: fuel ring as v1, no text, a straight row of pips across the bottom.
@@ -18,8 +16,9 @@
  */
 
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
-export type GaugeStyle = "v1" | "v2" | "v3" | "v4" | "v5" | "v6";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v2", "v3", "v4", "v5", "v6"];
+// "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6"];
 
 export interface GaugeFace {
 	style?: GaugeStyle;
@@ -101,7 +100,7 @@ function segFill(f: number, n: number, k: number, partial: boolean): number {
 
 /**
  * Segmented fuel arc from `start` over `sweep` degrees, square ends, 4° gaps.
- * `reverse` fills from the far end (v2's bottom half, so it fills left to right).
+ * `reverse` fills from the far end instead.
  */
 function fuelArc(g: Ring, start: number, sweep: number, n: number, f: number, partial: boolean, p: Paint, reverse = false): string {
 	const GAP = 4;
@@ -218,7 +217,6 @@ export function renderGauge(face: GaugeFace): string {
 	let parts = "";
 	let showText = true;
 	let iconScale = 1;
-	let iconShift = 0;
 	const ring: Ring = { cx: 72, cy: 66, r: 44, width: 9 };
 	const inner: Ring = { cx: 72, cy: 66, r: 32, width: 6 };
 	const lineY = 124;
@@ -226,14 +224,6 @@ export function renderGauge(face: GaugeFace): string {
 		case "v1":
 			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint);
 			break;
-		case "v2": {
-			const top: Ring = { cx: 72, cy: 72, r: 55, width: 9 };
-			const bottom: Ring = { cx: 72, cy: 72, r: 46, width: 9 };
-			parts = pipArc(top, 274, 172, pips.count, pips.filled, 9, pipPaint, pips.levels) + fuelArc(bottom, 94, 172, n, f, face.partial, fuelPaint, true);
-			showText = false;
-			iconShift = 6;
-			break;
-		}
 		case "v3":
 			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint) + pipArc(inner, 225, 270, pips.count, pips.filled, 10, pipPaint, pips.levels);
 			iconScale = 0.8;
@@ -259,7 +249,7 @@ export function renderGauge(face: GaugeFace): string {
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
 	const fontSize = face.valueText.length > 6 ? 21 : 26;
 	const iconTransform =
-		iconScale !== 1 ? ` transform="translate(72 66) scale(${iconScale}) translate(-72 -66)"` : iconShift ? ` transform="translate(0 ${iconShift})"` : "";
+		iconScale !== 1 ? ` transform="translate(72 66) scale(${iconScale}) translate(-72 -66)"` : "";
 	const text = showText
 		? `<text x="72" y="130" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" font-size="${fontSize}" fill="${COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
