@@ -63,8 +63,10 @@ const COG_STEP = 10;
 /** Landing gear swing: timed, since the game only says DEPLOYING / RETRACTING, not how far along. */
 const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
-/** Lights: beams grow out / shrink back over this long when switched. */
-const LIGHTS_MS = 1000;
+/** Lights and doors: how long the switch animation runs. */
+const SWITCH_MS = 1000;
+/** Icons that animate between their OFF and ON pose when the state flips. */
+const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors"];
 
 interface Instance {
 	action: { setImage(image?: string): Promise<void>; setTitle(title?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
@@ -253,13 +255,13 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = Date.now();
 			inst.lastSteady = phase;
 		}
-		// Lights: beams grow out when switched on and shrink back when switched off, then hold.
-		let lightAmount: number | undefined;
+		// Lights / doors: animate from one pose to the other when switched, then hold the pose.
+		let switchAmount: number | undefined;
 		let animating = false;
-		if (inst.icon === "lights" && (phase === "on" || phase === "off")) {
-			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / LIGHTS_MS);
+		if (SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
+			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / SWITCH_MS);
 			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
-			lightAmount = phase === "on" ? eased : 1 - eased;
+			switchAmount = phase === "on" ? eased : 1 - eased;
 			animating = t < 1;
 		}
 		// One frame timer drives the cog, the gear swing and the lights.
@@ -296,7 +298,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
-			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle, lightAmount });
+			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device

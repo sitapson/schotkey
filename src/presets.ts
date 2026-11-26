@@ -67,6 +67,8 @@ export interface HotkeyPreset {
 
 export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
 	gear: { field: "vehicle.state.flight.state.gear", onValues: "DEPLOYED", onLabel: "GEAR DOWN", offLabel: "GEAR UP", icon: "gear" },
+	// The ship's doors (exterior). The game only sends OPENED / CLOSED, no in-between.
+	doors: { field: "vehicle.state.doors.open_state", onValues: "OPENED", onLabel: "DOORS OPEN", offLabel: "DOORS SHUT", icon: "doors" },
 	lights: { field: "vehicle.state.lights_enabled", onLabel: "LIGHTS ON", offLabel: "LIGHTS OFF", icon: "lights" },
 	vtol: { field: "vehicle.state.flight.state.vtol", onValues: "DEPLOYED", onLabel: "VTOL ON", offLabel: "VTOL OFF", icon: "vtol" },
 	// Whole-ship power: the power plant running. Ship power off shuts it down.

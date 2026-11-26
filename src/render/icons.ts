@@ -7,6 +7,7 @@ import { userIconSvg } from "./user-icons";
 export type HotkeyIcon =
 	| "gear"
 	| "lights"
+	| "doors"
 	| "vtol"
 	| "boost"
 	| "engines"
@@ -22,7 +23,7 @@ export type HotkeyIcon =
 	| "shippower"
 	| "power";
 
-export const HOTKEY_ICONS: HotkeyIcon[] = ["gear", "lights", "vtol", "boost", "engines", "shields", "weapons", "coolers", "quantum", "coupled", "cruise", "limiter", "gsafe", "gimbals", "shippower", "power"];
+export const HOTKEY_ICONS: HotkeyIcon[] = ["gear", "lights", "doors", "vtol", "boost", "engines", "shields", "weapons", "coolers", "quantum", "coupled", "cruise", "limiter", "gsafe", "gimbals", "shippower", "power"];
 
 // Path data in the 48×48 box. Kept to strokes so one colour styles everything.
 const PATHS: Record<HotkeyIcon, string> = {
@@ -30,6 +31,8 @@ const PATHS: Record<HotkeyIcon, string> = {
 	gear: `<path d="M24 3v22M24 12l10 8"/><circle cx="24" cy="34" r="9"/><circle cx="24" cy="34" r="2.5"/>`,
 	// Headlight with beams.
 	lights: `<path d="M6 14h8c8 0 12 4 12 10s-4 10-12 10H6z"/><path d="M31 15l11-4M31 24h12M31 33l11 4"/>`,
+	// Two door halves (normally replaced by the supplied doors.svg).
+	doors: `<rect x="6" y="6" width="16" height="36" rx="3"/><rect x="26" y="6" width="16" height="36" rx="3"/><path d="M18 20v8M30 20v8"/>`,
 	// Downward thruster nozzle with thrust arrows.
 	vtol: `<path d="M12 6h24l-5 15H17z"/><path d="M18 27v13M30 27v13M14 36l4 5 4-5M26 36l4 5 4-5"/>`,
 	// Three chevrons.

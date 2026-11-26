@@ -12,6 +12,7 @@ export const USER_ICON_FILES: Record<string, string> = {
 	lights: "headlights.svg",
 	shippower: "power.svg",
 	coupled: "coupled.svg",
+	doors: "doors.svg",
 };
 
 const PAGE = 89.0625;
@@ -148,6 +149,34 @@ export function animatedLightsSvg(color: string, cx: number, cy: number, size: n
 		`<path d="${LIGHTS_LAMP}" fill="${color}"/>` +
 		beams +
 		`</g></g>`
+	);
+}
+
+/**
+ * Your doors.svg split into its two halves, which slide apart to open. Coordinates are that
+ * file's own (inside its group transforms), so `amount` 0 (shut) matches the static icon.
+ * `amount`: 0 = shut, 1 = fully open.
+ */
+const DOORS_FILE = "doors.svg";
+const DOOR_LEFT =
+	"m 8789.63,5404.3 v -11 h -14.5 c -3.9,0 -7,3.1 -7,7 v 33.4 c 0,3.8 3.1,7 7,7 h 14.5 v -11 c -1.7,0 -3.1,-1.4 -3.1,-3.1 v -19.3 c 0,-1.7 1.4,-3 3.1,-3 z m -7.2,18.8 c 0,1.3 -1,2.3 -2.3,2.3 -1.3,0 -2.3,-1 -2.3,-2.3 v -12.4 c 0,-1.3 1,-2.3 2.3,-2.3 1.3,0 2.3,1 2.3,2.3 z";
+const DOOR_RIGHT =
+	"m 8811.53,5393.3 h -14.5 v 11 c 1.7,0 3.1,1.4 3.1,3.1 v 19.1 c 0,1.7 -1.4,3.1 -3.1,3.1 v 11 h 14.5 c 3.9,0 7,-3.1 7,-7 v -33.4 c 0,-3.8 -3.1,-6.9 -7,-6.9 z m -2.7,29.8 c 0,1.3 -1,2.3 -2.3,2.3 -1.3,0 -2.3,-1 -2.3,-2.3 v -12.4 c 0,-1.3 1,-2.3 2.3,-2.3 1.3,0 2.3,1 2.3,2.3 z";
+const DOOR_TRAVEL = 9; // how far each half slides out when fully open (file units)
+
+export function animatedDoorsSvg(color: string, cx: number, cy: number, size: number, amount: number): string | null {
+	if (!load(DOORS_FILE)) return null;
+	const b = boxOf(DOORS_FILE);
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
+	const d = (DOOR_TRAVEL * Math.max(0, Math.min(1, amount))).toFixed(2);
+	return (
+		`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">` +
+		`<g transform="translate(-13179.784,-7930.9209)"><g transform="matrix(0.79884673,0,0,0.79884673,6199.7923,3648.0996)">` +
+		`<path d="${DOOR_LEFT}" fill="${color}" transform="translate(-${d} 0)"/>` +
+		`<path d="${DOOR_RIGHT}" fill="${color}" transform="translate(${d} 0)"/>` +
+		`</g></g></g>`
 	);
 }
 

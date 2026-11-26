@@ -3,7 +3,7 @@
  * state can be shown as the key's Stream Deck title instead (the "Show state as title" option).
  */
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
-import { animatedGearSvg, animatedLightsSvg } from "./user-icons";
+import { animatedDoorsSvg, animatedGearSvg, animatedLightsSvg } from "./user-icons";
 
 export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 
@@ -18,8 +18,8 @@ export interface HotkeyFace {
 	cogAngle?: number;
 	/** Landing gear only: strut angle (0 = down, about -85 = folded up). Drawn instead of the static icon or cog. */
 	gearAngle?: number;
-	/** Lights only: how far the beams are out (0 = off, 1 = on). Drawn instead of the static icon. */
-	lightAmount?: number;
+	/** Lights / doors: how far switched (0 = off / shut, 1 = on / open). Drawn instead of the static icon. */
+	switchAmount?: number;
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -27,8 +27,13 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 export function renderHotkey(face: HotkeyFace): string {
 	const fg = face.phase === "offline" ? "#8a96a3" : "#ffffff";
 	const gear = face.phase !== "offline" && face.gearAngle !== undefined ? animatedGearSvg(fg, 72, 72, 80, face.gearAngle) : null;
-	const lights = face.phase !== "offline" && face.lightAmount !== undefined ? animatedLightsSvg(fg, 72, 72, 80, face.lightAmount) : null;
-	const art = gear ?? lights ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
+	const a = face.switchAmount;
+	const switched =
+		face.phase === "offline" || a === undefined ? null
+		: face.icon === "lights" ? animatedLightsSvg(fg, 72, 72, 80, a)
+		: face.icon === "doors" ? animatedDoorsSvg(fg, 72, 72, 80, a)
+		: null;
+	const art = gear ?? switched ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
 		`<rect width="144" height="144" fill="#12171d"/>` +
