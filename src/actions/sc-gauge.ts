@@ -22,7 +22,7 @@ import type { JsonValue } from "@elgato/utils";
 import { Keyboard, parseKeys, Step } from "../input/keyboard";
 import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
-import { GaugeColors, GaugeIcon, GaugeStyle, renderGauge } from "../render/gauge";
+import { GAUGE_STYLES, GaugeColors, GaugeIcon, GaugeStyle, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
 import { offlineOpacityOf, PENDING_MS, pulseAt } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
@@ -55,7 +55,9 @@ type GaugeSettings = {
 	/** true (default): the icon takes the gauge's current colour. false: it uses iconColor. */
 	iconFollows?: boolean;
 	iconColor?: string;
-	/** Offline opacity, percent (default 20). */
+	/** Pip colour (unset = the gauge's normal colour). */
+	pipColor?: string;
+	/** Strength of faded parts, percent (default 20): offline, unlit pips, empty fuel, system off. */
 	offlineOpacity?: number | string;
 	/** Look: v1 classic ring, v2 split pips/fuel, v3 fuel ring with inner pips. */
 	style?: GaugeStyle;
@@ -71,6 +73,7 @@ function colorsOf(s: GaugeSettings): GaugeColors {
 		normal: hex(s.gaugeColor),
 		warn: hex(s.warnColor),
 		alert: hex(s.alertColor),
+		pips: hex(s.pipColor),
 		icon: s.iconFollows === false ? hex(s.iconColor) : undefined,
 	};
 }
@@ -315,12 +318,12 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		const colors = colorsOf(s);
 		// Pips: the game doesn't report pip levels, so 66% are lit while the gauge's system is on
 		// (no state field = always on), none while it's off or there's no data.
-		const style: GaugeStyle = s.style === "v2" || s.style === "v3" ? s.style : "v1";
+		const style: GaugeStyle = GAUGE_STYLES.includes(s.style as GaugeStyle) ? (s.style as GaugeStyle) : "v1";
 		const pipCount = Math.max(1, Math.min(12, Math.round(num(s.pips, 4))));
 		const pips = { count: pipCount, filled: live && !inactive ? Math.round(pipCount * 0.66) : 0 };
 		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}|${style}|${pips.count}|${pips.filled}`;
 		if (key === inst.lastKey) return;
 		inst.lastKey = key;
-		void inst.action.setImage(renderGauge({ style, pips, fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity), pulse }));
+		void inst.action.setImage(renderGauge({ style, pips, fraction, valueText, icon, segments, partial, level, inactive, colors, fade: offlineOpacityOf(s.offlineOpacity), pulse }));
 	}
 }

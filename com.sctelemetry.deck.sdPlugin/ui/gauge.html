@@ -24,9 +24,12 @@
 		</sdpi-item>
 		<sdpi-item label="Style">
 			<sdpi-select setting="style" default="v1">
-				<option value="v1">Classic: ring and %</option>
-				<option value="v2">Split: pips on top, fuel below, no text</option>
-				<option value="v3">Double: fuel ring with pips inside</option>
+				<option value="v1">1 · Ring and %</option>
+				<option value="v2">2 · Pips on top, fuel below</option>
+				<option value="v3">3 · Fuel ring, pips inside</option>
+				<option value="v4">4 · Pips ring, fuel inside</option>
+				<option value="v5">5 · Fuel ring, pip row below</option>
+				<option value="v6">6 · Pips ring, fuel bar below</option>
 			</sdpi-select>
 		</sdpi-item>
 		<sdpi-item label="Pips">
@@ -54,21 +57,24 @@
 
 		<details>
 			<summary>Colours</summary>
-			<div class="group">Key</div>
-			<sdpi-item label="Background"><sdpi-color setting="bgColor" default="#13202a"></sdpi-color></sdpi-item>
+			<div class="group">Background</div>
+			<sdpi-item label="Colour"><sdpi-color setting="bgColor" default="#13202a"></sdpi-color></sdpi-item>
 
-			<div class="group">Ring <span>colour of the lit segments at each level</span></div>
+			<div class="group">Gauge <span>the fuel segments, by level</span></div>
 			<sdpi-item label="Normal"><sdpi-color setting="gaugeColor" default="#3fd0c9"></sdpi-color></sdpi-item>
 			<sdpi-item label="Low (yellow %)"><sdpi-color setting="warnColor" default="#f2c230"></sdpi-color></sdpi-item>
 			<sdpi-item label="Critical (red %)"><sdpi-color setting="alertColor" default="#ff4f4f"></sdpi-color></sdpi-item>
 
+			<div class="group">Pips</div>
+			<sdpi-item label="Colour"><sdpi-color setting="pipColor" default="#3fd0c9"></sdpi-color></sdpi-item>
+
 			<div class="group">Icon</div>
 			<sdpi-item label="Colour">
-				<sdpi-checkbox setting="iconFollows" default="true" label="Match the ring (changes with the level)"></sdpi-checkbox>
+				<sdpi-checkbox setting="iconFollows" default="true" label="Match the gauge (changes with the level)"></sdpi-checkbox>
 			</sdpi-item>
 			<sdpi-item label="Fixed colour"><sdpi-color setting="iconColor" default="#e9f2f6"></sdpi-color></sdpi-item>
 
-			<div class="group">Offline <span>no data from the game; icon and text in their usual colour, faded</span></div>
+			<div class="group">Faded <span>unlit pips, empty fuel segments, system switched off, and the whole key when offline: each in its own colour at this strength</span></div>
 			<sdpi-item label="Strength %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
 		</details>
 
