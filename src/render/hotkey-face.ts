@@ -3,7 +3,7 @@
  * state can be shown as the key's Stream Deck title instead (the "Show state as title" option).
  */
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
-import { animatedDoorsSvg, animatedGearSvg, animatedLightsSvg } from "./user-icons";
+import { animatedDoorsSvg, animatedGearSvg, animatedLightsSvg, pipIconSvg } from "./user-icons";
 
 export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 
@@ -22,6 +22,8 @@ export interface HotkeyFace {
 	gearAngle?: number;
 	/** Lights / doors: how far switched (0 = off / shut, 1 = on / open). Drawn instead of the static icon. */
 	switchAmount?: number;
+	/** Power icons: the pip ring around the symbol. */
+	pips?: { count: number; filled: number };
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -35,7 +37,8 @@ export function renderHotkey(face: HotkeyFace): string {
 		: face.icon === "lights" ? animatedLightsSvg(fg, 72, 72, 80, a)
 		: face.icon === "doors" ? animatedDoorsSvg(fg, 72, 72, 80, a)
 		: null;
-	const art = gear ?? switched ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
+	const pipped = face.pips ? pipIconSvg(face.icon, fg, 72, 72, 84, face.pips.count, face.pips.filled) : null;
+	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
 		`<rect width="144" height="144" fill="#12171d"/>` +

@@ -53,6 +53,8 @@ type HotkeySettings = {
 	busyColor?: string;
 	/** Background when there's no telemetry for this button. */
 	offlineColor?: string;
+	/** Power icons: how many pips in the ring (1-12). */
+	pips?: number | string;
 	/** Icon colour in each state. */
 	onIconColor?: string;
 	offIconColor?: string;
@@ -72,6 +74,9 @@ const GEAR_UP_ANGLE = -85;
 const SWITCH_MS = 1000;
 /** Icons that animate between their OFF and ON pose when the state flips. */
 const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors"];
+/** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
+const PIP_ICONS: HotkeyIcon[] = ["shippower", "shields"];
+const PIPS_LIT_WHEN_ON = 0.66;
 
 interface Instance {
 	action: { setImage(image?: string): Promise<void>; setTitle(title?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
@@ -308,7 +313,9 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? s.busyIconColor
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
-			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
+			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
+			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0 } : undefined;
+			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device

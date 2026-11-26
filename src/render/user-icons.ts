@@ -13,6 +13,7 @@ export const USER_ICON_FILES: Record<string, string> = {
 	shippower: "power.svg",
 	coupled: "coupled.svg",
 	doors: "doors.svg",
+	shields: "power-shields.svg",
 };
 
 const PAGE = 89.0625;
@@ -177,6 +178,59 @@ export function animatedDoorsSvg(color: string, cx: number, cy: number, size: nu
 		`<path d="${DOOR_LEFT}" fill="${color}" transform="translate(-${d} 0)"/>` +
 		`<path d="${DOOR_RIGHT}" fill="${color}" transform="translate(${d} 0)"/>` +
 		`</g></g></g>`
+	);
+}
+
+/**
+ * Your power-*.svg icons (a symbol inside four bars that stand for power pips), with the four
+ * bars replaced by a ring of `count` pips, `filled` of them lit. The first four <path>s in those
+ * files are the bars; everything after is the symbol (bolt, shield…), which is kept as drawn.
+ * Pips fill clockwise from the bottom. Unlit pips are drawn faint in the same colour.
+ */
+export const PIP_ICON_FILES: Record<string, string> = {
+	shippower: "power.svg",
+	shields: "power-shields.svg",
+};
+
+export function pipIconSvg(icon: string, color: string, cx: number, cy: number, size: number, count: number, filled: number): string | null {
+	const file = PIP_ICON_FILES[icon];
+	const body = file ? load(file) : null;
+	if (!body) return null;
+	let removed = 0;
+	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
+	const b = boxOf(file);
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
+
+	// The ring sits where the bars were: the outer edge of the artwork.
+	const n = Math.max(1, Math.min(12, Math.round(count)));
+	const width = size * 0.07;
+	const r = size / 2 - width / 2;
+	const per = 360 / n;
+	const gap = n === 1 ? 0 : Math.min(per * 0.3, 40);
+	const at = (deg: number) => {
+		const t = ((deg - 90) * Math.PI) / 180;
+		return `${(cx + r * Math.cos(t)).toFixed(2)} ${(cy + r * Math.sin(t)).toFixed(2)}`;
+	};
+	let ring = "";
+	for (let i = 0; i < n; i++) {
+		const lit = i < filled;
+		const style = `fill="none" stroke="${color}" stroke-width="${width.toFixed(2)}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}`;
+		if (n === 1) {
+			ring += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(2)}" ${style}/>`;
+			continue;
+		}
+		// Start at the bottom (180°) and go clockwise; leave room for the round caps.
+		const cap = (width / 2 / r) * (180 / Math.PI);
+		const a0 = 180 + i * per + gap / 2 + cap;
+		const a1 = 180 + (i + 1) * per - gap / 2 - cap;
+		if (a1 <= a0) continue;
+		ring += `<path d="M${at(a0)}A${r.toFixed(2)} ${r.toFixed(2)} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" ${style}/>`;
+	}
+	return (
+		ring +
+		`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`
 	);
 }
 
