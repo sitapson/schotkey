@@ -12,6 +12,8 @@ export interface HotkeyFace {
 	icon: HotkeyIcon;
 	/** Background for this phase. */
 	color: string;
+	/** Icon colour for this phase (default white; grey when offline). */
+	iconColor?: string;
 	/** Telemetry feed connected: small green dot, grey when not. */
 	live: boolean;
 	/** Cog rotation in degrees while busy. */
@@ -25,7 +27,7 @@ export interface HotkeyFace {
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 export function renderHotkey(face: HotkeyFace): string {
-	const fg = face.phase === "offline" ? "#8a96a3" : "#ffffff";
+	const fg = face.iconColor ?? (face.phase === "offline" ? "#8a96a3" : "#ffffff");
 	const gear = face.phase !== "offline" && face.gearAngle !== undefined ? animatedGearSvg(fg, 72, 72, 80, face.gearAngle) : null;
 	const a = face.switchAmount;
 	const switched =

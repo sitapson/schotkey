@@ -53,6 +53,11 @@ type HotkeySettings = {
 	busyColor?: string;
 	/** Background when there's no telemetry for this button. */
 	offlineColor?: string;
+	/** Icon colour in each state. */
+	onIconColor?: string;
+	offIconColor?: string;
+	busyIconColor?: string;
+	offlineIconColor?: string;
 };
 
 type Phase = HotkeyPhase;
@@ -298,7 +303,12 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
-			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
+			const iconColor =
+				phase === "offline" ? s.offlineIconColor
+				: phase === "busy" ? s.busyIconColor
+				: phase === "on" ? s.onIconColor
+				: s.offIconColor;
+			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device
