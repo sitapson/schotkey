@@ -69,16 +69,32 @@ export function iconSvg(icon: HotkeyIcon, color: string, cx: number, cy: number,
 	);
 }
 
-/** A cog, rotated by `angle` degrees: drawn frame by frame to spin while a system is moving. */
-export function cogSvg(color: string, cx: number, cy: number, size: number, angle: number): string {
+/**
+ * A solid six-tooth cog with a round hole, rotated by `angle` degrees: drawn frame by frame to
+ * spin while a system is moving. The hole is filled with `holeColor` (the key's background) so
+ * it reads as a cut-out on any background.
+ */
+export function cogSvg(color: string, cx: number, cy: number, size: number, angle: number, holeColor: string): string {
 	const s = size / 48;
-	let teeth = "";
-	for (let i = 0; i < 8; i++) teeth += `<path d="M24 4v7" transform="rotate(${i * 45} 24 24)"/>`;
+	const TIP = 20.5; // tooth tips
+	const ROOT = 16; // between teeth
+	const TIP_HALF = 14; // half-width of a tooth at the tip, degrees
+	const ROOT_HALF = 22; // half-width of a tooth at the root, degrees
+	const at = (deg: number, r: number) => {
+		const t = ((deg - 90) * Math.PI) / 180;
+		return `${(24 + r * Math.cos(t)).toFixed(2)} ${(24 + r * Math.sin(t)).toFixed(2)}`;
+	};
+	let d = "";
+	for (let i = 0; i < 6; i++) {
+		const a = i * 60;
+		d += `${i ? "L" : "M"}${at(a - ROOT_HALF, ROOT)}L${at(a - TIP_HALF, TIP)}L${at(a + TIP_HALF, TIP)}L${at(a + ROOT_HALF, ROOT)}`;
+		d += `A${ROOT} ${ROOT} 0 0 1 ${at(a + 60 - ROOT_HALF, ROOT)}`;
+	}
 	return (
-		`<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s}) rotate(${angle} 24 24)" fill="none" stroke="${color}" stroke-linecap="round">` +
-		`<g stroke-width="7">${teeth}</g>` +
-		`<circle cx="24" cy="24" r="13" stroke-width="5"/>` +
-		`<circle cx="24" cy="24" r="4.5" stroke-width="3.5"/>` +
+		`<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s}) rotate(${angle} 24 24)">` +
+		// A thick round-joined stroke in the same colour softens the tooth corners, like the reference.
+		`<path d="${d}Z" fill="${color}" stroke="${color}" stroke-width="4" stroke-linejoin="round"/>` +
+		`<circle cx="24" cy="24" r="8.5" fill="${holeColor}"/>` +
 		`</g>`
 	);
 }

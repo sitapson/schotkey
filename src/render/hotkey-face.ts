@@ -23,7 +23,7 @@ export function renderHotkey(face: HotkeyFace): string {
 	const dim = face.phase === "offline";
 	const fg = dim ? "#8a96a3" : "#ffffff";
 	const cy = face.value ? 52 : 56;
-	const art = face.phase === "busy" ? cogSvg(fg, 72, cy, 62, face.cogAngle ?? 0) : iconSvg(face.icon, fg, 72, cy, 62);
+	const art = face.phase === "busy" ? cogSvg(fg, 72, cy, 58, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, cy, 62);
 	const label = face.label.toUpperCase();
 	const labelSize = label.length > 11 ? 15 : label.length > 8 ? 18 : 21;
 	const labelY = face.value ? 108 : 118;
