@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 (in progress)
+
+- Work starts here.
+
 ## 0.1.0 (26 Nov 2026)
 
 Saved in `releases/`: `sc-telemetry-deck-v0.1.0.streamDeckPlugin` (double-click to install) and `sc-telemetry-deck-v0.1.0-source.zip` (the project source).
