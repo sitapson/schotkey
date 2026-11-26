@@ -76,7 +76,7 @@ export function iconSvg(icon: HotkeyIcon, color: string, cx: number, cy: number,
  */
 export function cogSvg(color: string, cx: number, cy: number, size: number, angle: number, holeColor: string): string {
 	const s = size / 48;
-	const TIP = 20.5; // tooth tips
+	const TIP = 22; // tooth tips
 	const ROOT = 16; // between teeth
 	const TIP_HALF = 14; // half-width of a tooth at the tip, degrees
 	const ROOT_HALF = 22; // half-width of a tooth at the root, degrees
@@ -94,7 +94,7 @@ export function cogSvg(color: string, cx: number, cy: number, size: number, angl
 		`<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s}) rotate(${angle} 24 24)">` +
 		// A thick round-joined stroke in the same colour softens the tooth corners, like the reference.
 		`<path d="${d}Z" fill="${color}" stroke="${color}" stroke-width="4" stroke-linejoin="round"/>` +
-		`<circle cx="24" cy="24" r="8.5" fill="${holeColor}"/>` +
+		`<circle cx="24" cy="24" r="10" fill="${holeColor}"/>` +
 		`</g>`
 	);
 }
