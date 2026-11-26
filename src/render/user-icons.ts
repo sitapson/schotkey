@@ -10,6 +10,7 @@ import { join } from "node:path";
 export const USER_ICON_FILES: Record<string, string> = {
 	gear: "landing-gear.svg",
 	lights: "headlights.svg",
+	shippower: "power.svg",
 };
 
 const PAGE = 89.0625;

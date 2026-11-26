@@ -69,6 +69,8 @@ export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
 	gear: { field: "vehicle.state.flight.state.gear", onValues: "DEPLOYED", onLabel: "GEAR DOWN", offLabel: "GEAR UP", icon: "gear" },
 	lights: { field: "vehicle.state.lights_enabled", onLabel: "LIGHTS ON", offLabel: "LIGHTS OFF", icon: "lights" },
 	vtol: { field: "vehicle.state.flight.state.vtol", onValues: "DEPLOYED", onLabel: "VTOL ON", offLabel: "VTOL OFF", icon: "vtol" },
+	// Whole-ship power: the power plant running. Ship power off shuts it down.
+	shippower: { field: "vehicle.state.power.powerplants", onLabel: "POWER ON", offLabel: "POWER OFF", icon: "shippower" },
 	engines: { field: "vehicle.state.power.engines", onLabel: "ENGINES ON", offLabel: "ENGINES OFF", icon: "engines" },
 	shields: { field: "vehicle.state.power.shield_generators", onLabel: "SHIELDS ON", offLabel: "SHIELDS OFF", icon: "shields" },
 	weapons: { field: "vehicle.state.power.weapons", onLabel: "WEAPONS ON", offLabel: "WEAPONS OFF", icon: "weapons" },
