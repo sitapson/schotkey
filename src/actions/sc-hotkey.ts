@@ -80,6 +80,18 @@ const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors"];
 const PIP_ICONS: HotkeyIcon[] = ["shippower", "shields"];
 const PIPS_LIT_WHEN_ON = 0.66;
 
+/**
+ * Powering on: the game has no in-between state for systems like engines, so after a press
+ * that should switch something ON, the icon pulses until the game reports it ON (real data)
+ * or PENDING_MS passes.
+ */
+export const PENDING_MS = 5000;
+const PULSE_PERIOD_MS = 900;
+/** Icon opacity for a pulse that started at `since`: smoothly between 0.3 and 1. */
+export function pulseAt(since: number): number {
+	return 0.3 + 0.7 * (0.5 + 0.5 * Math.cos((2 * Math.PI * (Date.now() - since)) / PULSE_PERIOD_MS));
+}
+
 /** Offline opacity setting (percent, default 20) as 0-1. */
 export function offlineOpacityOf(v: unknown): number {
 	const n = typeof v === "number" ? v : parseFloat(String(v ?? ""));
@@ -106,6 +118,8 @@ interface Instance {
 	/** Last settled ON/OFF, and when it last flipped (for the lights animation). */
 	lastSteady?: "on" | "off";
 	flipSince?: number;
+	/** Pressed while OFF: pulsing until the game reports ON. */
+	pendingSince?: number;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -161,6 +175,11 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 
 		if (pressMode === "hold") return this.keyboard.press(inst.steps);
 		this.keyboard.tap(inst.steps, pressMode === "long" ? (inst.settings.longMs ?? 1000) : (inst.settings.holdMs ?? 40));
+		// Switching something ON that has no in-between state of its own: pulse until confirmed.
+		if (before === "off" && inst.icon !== "gear") {
+			inst.pendingSince = Date.now();
+			this.render(inst);
+		}
 
 		if (verify && inst.settings.field && before !== "offline") {
 			setTimeout(() => {
@@ -276,6 +295,10 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		// Lights / doors: animate from one pose to the other when switched, then hold the pose.
 		let switchAmount: number | undefined;
 		let animating = false;
+		// Powering on: pulse until the game reports anything but OFF, or the wait runs out.
+		if (inst.pendingSince !== undefined && (phase !== "off" || Date.now() - inst.pendingSince > PENDING_MS)) inst.pendingSince = undefined;
+		const pulse = inst.pendingSince !== undefined ? pulseAt(inst.pendingSince) : undefined;
+		if (pulse !== undefined) animating = true;
 		if (SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
 			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / SWITCH_MS);
 			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
@@ -323,7 +346,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: s.offIconColor;
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
 			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0 } : undefined;
-			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : undefined;
+			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
 

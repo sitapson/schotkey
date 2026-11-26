@@ -24,7 +24,7 @@ import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
 import { GaugeColors, GaugeIcon, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
-import { offlineOpacityOf } from "./sc-hotkey";
+import { offlineOpacityOf, PENDING_MS, pulseAt } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
 
 type GaugeSettings = {
@@ -132,6 +132,9 @@ interface Instance {
 	lastKey?: string;
 	pressSeq: number;
 	stateChangedSincePress: boolean;
+	/** Pressed while the state field was OFF: pulsing until the game reports ON. */
+	pendingSince?: number;
+	pulseTimer?: NodeJS.Timeout;
 }
 
 const num = (v: unknown, fallback: number) => {
@@ -159,7 +162,9 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 	}
 
 	override onWillDisappear(ev: WillDisappearEvent<GaugeSettings>): void {
-		this.instances.get(ev.action.id)?.unsubscribe.forEach((u) => u());
+		const gone = this.instances.get(ev.action.id);
+		gone?.unsubscribe.forEach((u) => u());
+		if (gone) clearInterval(gone.pulseTimer);
 		this.instances.delete(ev.action.id);
 	}
 
@@ -177,6 +182,12 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		const stateBefore = inst.state;
 		streamDeck.logger.debug(`${tag}: tap "${s.keys}"${stateField ? ` (${stateField} = ${JSON.stringify(stateBefore)})` : ""}`);
 		this.keyboard.tap(inst.steps);
+		// Powering on (e.g. engines for hydrogen): pulse the icon until the game reports ON.
+		if (stateField && stateBefore !== undefined && !isOn(stateBefore, resolve(s).stateOnValues) && this.telemetry.status === "live") {
+			inst.pendingSince = Date.now();
+			inst.pulseTimer ??= setInterval(() => this.render(inst), 80);
+			this.render(inst);
+		}
 
 		// Same check as SC Hotkey: any change in the state field after the press means the game took it.
 		if ((s.verify ?? true) && stateField && stateBefore !== undefined && this.telemetry.status === "live") {
@@ -267,6 +278,12 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		// in the same message, and the fuel listener may run first.
 		const state = stateField ? this.telemetry.get(stateField) : undefined;
 		const inactive = live && state !== undefined && !isOn(state, r.stateOnValues);
+		if (inst.pendingSince !== undefined && (!inactive || !live || Date.now() - inst.pendingSince > PENDING_MS)) {
+			inst.pendingSince = undefined;
+			clearInterval(inst.pulseTimer);
+			inst.pulseTimer = undefined;
+		}
+		const pulse = inst.pendingSince !== undefined ? pulseAt(inst.pendingSince) : undefined;
 		if (live && inst.value !== 0) inst.seenNonZero = true;
 		if (live) {
 			// Always the game's live value. While OFF that may be 0 (hydrogen reads 0 with the
@@ -292,9 +309,9 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 
 		// Only redraw when what's on the key would change (fuel creeps in tiny steps at ~18 Hz).
 		const colors = colorsOf(s);
-		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}`;
+		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}`;
 		if (key === inst.lastKey) return;
 		inst.lastKey = key;
-		void inst.action.setImage(renderGauge({ fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity) }));
+		void inst.action.setImage(renderGauge({ fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity), pulse }));
 	}
 }

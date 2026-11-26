@@ -15,6 +15,8 @@ export interface GaugeFace {
 	inactive?: boolean;
 	/** User colour choices; anything missing uses the defaults below. */
 	colors?: GaugeColors;
+	/** Powering on: icon drawn in its normal colour at this opacity (0-1), animated as a pulse. */
+	pulse?: number;
 	/** Offline: icon and text drawn in their normal colours at this opacity (0-1, default 0.2). */
 	offlineOpacity?: number;
 }
@@ -121,7 +123,8 @@ export function renderGauge(face: GaugeFace): string {
 	const border = "#2b3a45";
 	const borderWidth = 2;
 	const offline = face.level === "offline";
-	const iconColor = offline ? (user.icon ?? C.normal) : face.inactive ? COLORS.offline : (user.icon ?? color);
+	const pulsing = face.pulse !== undefined && !offline;
+	const iconColor = offline || pulsing ? (user.icon ?? C.normal) : face.inactive ? COLORS.offline : (user.icon ?? color);
 	const textColor = !offline && face.inactive ? COLORS.dim : COLORS.text;
 	const faint = offline ? ` opacity="${(face.offlineOpacity ?? 0.2).toFixed(2)}"` : "";
 	const fontSize = face.valueText.length > 6 ? 21 : 26;
@@ -131,7 +134,7 @@ export function renderGauge(face: GaugeFace): string {
 		`<rect width="144" height="144" fill="${C.bg}"/>` +
 		`<rect x="4" y="4" width="136" height="136" rx="14" fill="${C.panel}" stroke="${border}" stroke-width="${borderWidth}"/>` +
 		ring +
-		`<g${faint}>${icon(face.icon, iconColor)}</g>` +
+		`<g${pulsing ? ` opacity="${face.pulse!.toFixed(2)}"` : faint}>${icon(face.icon, iconColor)}</g>` +
 		`<g font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle"${faint}>` +
 		`<text x="72" y="130" font-size="${fontSize}" fill="${textColor}">${esc(face.valueText)}</text>` +
 		`</g></svg>`;
