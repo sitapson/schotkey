@@ -16,7 +16,7 @@ export interface HotkeyFace {
 	live: boolean;
 	/** Cog rotation in degrees while busy. */
 	cogAngle?: number;
-	/** Landing gear only: strut angle while moving (0 = down, about -85 = up). Replaces the cog. */
+	/** Landing gear only: strut angle (0 = down, about -85 = folded up). Drawn instead of the static icon or cog. */
 	gearAngle?: number;
 }
 
@@ -24,9 +24,8 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
 export function renderHotkey(face: HotkeyFace): string {
 	const fg = face.phase === "offline" ? "#8a96a3" : "#ffffff";
-	const art =
-		face.phase !== "busy" ? iconSvg(face.icon, fg, 72, 72, 80)
-		: (face.gearAngle !== undefined && animatedGearSvg(fg, 72, 72, 80, face.gearAngle)) || cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color);
+	const gear = face.phase !== "offline" && face.gearAngle !== undefined ? animatedGearSvg(fg, 72, 72, 80, face.gearAngle) : null;
+	const art = gear ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
 		`<rect width="144" height="144" fill="#12171d"/>` +

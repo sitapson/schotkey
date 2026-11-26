@@ -59,7 +59,7 @@ type Phase = HotkeyPhase;
 const COG_FRAME_MS = 80;
 const COG_STEP = 10;
 /** Landing gear swing: timed, since the game only says DEPLOYING / RETRACTING, not how far along. */
-const GEAR_SWING_MS = 2500;
+const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
 
 interface Instance {
@@ -244,13 +244,18 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 			this.stopCog(inst);
 			inst.busySince = undefined;
 		}
-		// Landing gear swings instead of showing the cog: eased in and out like an actuator, holding
-		// the end pose if the game takes longer than GEAR_SWING_MS to report it finished.
+		// Landing gear is drawn by pose: hanging down when deployed (ON), folded up when retracted
+		// (OFF), and swinging between the two while moving (eased like an actuator, holding the end
+		// pose if the game takes longer than GEAR_SWING_MS to report it finished).
 		let gearAngle: number | undefined;
-		if (phase === "busy" && inst.icon === "gear" && inst.busySince !== undefined) {
-			const t = Math.min(1, (Date.now() - inst.busySince) / GEAR_SWING_MS);
-			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
-			gearAngle = GEAR_UP_ANGLE * (headingOn(inst.value as string) ? 1 - eased : eased);
+		if (inst.icon === "gear") {
+			if (phase === "on") gearAngle = 0;
+			else if (phase === "off") gearAngle = GEAR_UP_ANGLE;
+			else if (phase === "busy" && inst.busySince !== undefined) {
+				const t = Math.min(1, (Date.now() - inst.busySince) / GEAR_SWING_MS);
+				const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+				gearAngle = GEAR_UP_ANGLE * (headingOn(inst.value as string) ? 1 - eased : eased);
+			}
 		}
 
 		// The state in words. Not drawn on the image; optionally shown as the key's title.
