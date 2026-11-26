@@ -33,7 +33,8 @@ export interface GaugeFace {
 	level: "normal" | "warn" | "alert" | "offline";
 	/** System switched off (e.g. engines off): icon and text drawn faded. */
 	inactive?: boolean;
-	pips?: { count: number; filled: number };
+	/** `levels` (0-1 per pip) overrides `filled` while pips are animating on or off. */
+	pips?: { count: number; filled: number; levels?: number[] };
 	colors?: GaugeColors;
 	/** Powering on: icon opacity (0-1), animated as a pulse. */
 	pulse?: number;
@@ -133,8 +134,14 @@ function fuelLine(x0: number, x1: number, y: number, h: number, n: number, f: nu
 	return out;
 }
 
+/** Opacity of pip i: lit / unlit, or part way while animating. */
+function pipOpacity(i: number, filled: number, levels: number[] | undefined, p: Paint): number {
+	const level = levels ? (levels[i] ?? 0) : i < filled ? 1 : 0;
+	return p.fade + (p.lit - p.fade) * level;
+}
+
 /** Pip arc like the power hotkeys: rounded ends, clear gaps, the first `filled` lit. */
-function pipArc(g: Ring, start: number, sweep: number, count: number, filled: number, gap: number, p: Paint): string {
+function pipArc(g: Ring, start: number, sweep: number, count: number, filled: number, gap: number, p: Paint, levels?: number[]): string {
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const cap = ((g.width / 2) / g.r) * (180 / Math.PI);
 	const per = sweep / n;
@@ -143,13 +150,13 @@ function pipArc(g: Ring, start: number, sweep: number, count: number, filled: nu
 		const a0 = start + i * per + (i === 0 ? cap : gap / 2 + cap);
 		const a1 = start + (i + 1) * per - (i === n - 1 ? cap : gap / 2 + cap);
 		if (a1 <= a0) continue;
-		out += `<path d="${arc(g, a0, a1)}" fill="none" stroke="${p.color}" stroke-width="${g.width}" stroke-linecap="round"${op(i < filled ? p.lit : p.fade)}/>`;
+		out += `<path d="${arc(g, a0, a1)}" fill="none" stroke="${p.color}" stroke-width="${g.width}" stroke-linecap="round"${op(pipOpacity(i, filled, levels, p))}/>`;
 	}
 	return out;
 }
 
 /** Straight row of rounded pips from x0 to x1, the first `filled` lit, left to right. */
-function pipLine(x0: number, x1: number, y: number, width: number, count: number, filled: number, p: Paint): string {
+function pipLine(x0: number, x1: number, y: number, width: number, count: number, filled: number, p: Paint, levels?: number[]): string {
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const GAP = 8;
 	const per = (x1 - x0 + GAP) / n;
@@ -159,7 +166,7 @@ function pipLine(x0: number, x1: number, y: number, width: number, count: number
 		const a = x0 + i * per + width / 2;
 		const b = x0 + (i + 1) * per - GAP - width / 2;
 		const line = b > a ? `<path d="M${a.toFixed(2)} ${y}H${b.toFixed(2)}"` : `<path d="M${a.toFixed(2)} ${y}h0.01"`;
-		out += `${line} stroke="${p.color}" stroke-width="${width}" stroke-linecap="round"${op(i < filled ? p.lit : p.fade)}/>`;
+		out += `${line} stroke="${p.color}" stroke-width="${width}" stroke-linecap="round"${op(pipOpacity(i, filled, levels, p))}/>`;
 	}
 	return out;
 }
@@ -222,25 +229,25 @@ export function renderGauge(face: GaugeFace): string {
 		case "v2": {
 			const top: Ring = { cx: 72, cy: 72, r: 55, width: 9 };
 			const bottom: Ring = { cx: 72, cy: 72, r: 46, width: 9 };
-			parts = pipArc(top, 274, 172, pips.count, pips.filled, 9, pipPaint) + fuelArc(bottom, 94, 172, n, f, face.partial, fuelPaint, true);
+			parts = pipArc(top, 274, 172, pips.count, pips.filled, 9, pipPaint, pips.levels) + fuelArc(bottom, 94, 172, n, f, face.partial, fuelPaint, true);
 			showText = false;
 			iconShift = 6;
 			break;
 		}
 		case "v3":
-			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint) + pipArc(inner, 225, 270, pips.count, pips.filled, 10, pipPaint);
+			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint) + pipArc(inner, 225, 270, pips.count, pips.filled, 10, pipPaint, pips.levels);
 			iconScale = 0.8;
 			break;
 		case "v4":
-			parts = pipArc(ring, 225, 270, pips.count, pips.filled, 9, pipPaint) + fuelArc(inner, 225, 270, n, f, face.partial, fuelPaint);
+			parts = pipArc(ring, 225, 270, pips.count, pips.filled, 9, pipPaint, pips.levels) + fuelArc(inner, 225, 270, n, f, face.partial, fuelPaint);
 			iconScale = 0.8;
 			break;
 		case "v5":
-			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint) + pipLine(30, 114, lineY, 8, pips.count, pips.filled, pipPaint);
+			parts = fuelArc(ring, 225, 270, n, f, face.partial, fuelPaint) + pipLine(30, 114, lineY, 8, pips.count, pips.filled, pipPaint, pips.levels);
 			showText = false;
 			break;
 		case "v6":
-			parts = pipArc(ring, 225, 270, pips.count, pips.filled, 9, pipPaint) + fuelLine(30, 114, lineY, 9, n, f, face.partial, fuelPaint);
+			parts = pipArc(ring, 225, 270, pips.count, pips.filled, 9, pipPaint, pips.levels) + fuelLine(30, 114, lineY, 9, n, f, face.partial, fuelPaint);
 			showText = false;
 			break;
 	}

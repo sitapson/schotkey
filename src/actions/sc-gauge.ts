@@ -78,6 +78,15 @@ function colorsOf(s: GaugeSettings): GaugeColors {
 	};
 }
 
+/**
+ * Lit <-> unlit transitions animate quickly: the fuel ring sweeps (filling from the bottom up,
+ * draining from the top down) and pips light or go out one after another. Small changes, like
+ * fuel slowly burning, are drawn directly.
+ */
+const ANIM_MS = 250;
+const FUEL_JUMP = 0.02;
+const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * Math.max(0, Math.min(1, t)));
+
 const DEFAULTS = { min: 0, max: 1, segments: 10, partial: true, warnAt: 50, alertAt: 15, decimals: 0, offLabel: "OFF" };
 
 interface Resolved {
@@ -142,6 +151,15 @@ interface Instance {
 	/** Pressed while the state field was OFF: pulsing until the game reports ON. */
 	pendingSince?: number;
 	pulseTimer?: NodeJS.Timeout;
+	/** Fuel sweep: from / to fraction and when it started. */
+	fFrom?: number;
+	fTo?: number;
+	fStart?: number;
+	/** Pips lighting / dimming in turn: from / to lit count and when it started. */
+	pFrom?: number;
+	pTo?: number;
+	pStart?: number;
+	animTimer?: NodeJS.Timeout;
 }
 
 const num = (v: unknown, fallback: number) => {
@@ -171,7 +189,10 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 	override onWillDisappear(ev: WillDisappearEvent<GaugeSettings>): void {
 		const gone = this.instances.get(ev.action.id);
 		gone?.unsubscribe.forEach((u) => u());
-		if (gone) clearInterval(gone.pulseTimer);
+		if (gone) {
+			clearInterval(gone.pulseTimer);
+			clearInterval(gone.animTimer);
+		}
 		this.instances.delete(ev.action.id);
 	}
 
@@ -237,6 +258,8 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		inst.unsubscribe = [];
 		inst.value = undefined;
 		inst.seenNonZero = false;
+		// New settings start from the current values with no animation.
+		inst.fTo = inst.pTo = inst.fStart = inst.pStart = undefined;
 		inst.state = undefined;
 		inst.lastKey = undefined;
 		const { field, stateField, maxField } = resolve(settings);
@@ -321,9 +344,52 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		const style: GaugeStyle = GAUGE_STYLES.includes(s.style as GaugeStyle) ? (s.style as GaugeStyle) : "v1";
 		const pipCount = Math.max(1, Math.min(12, Math.round(num(s.pips, 4))));
 		const pips = { count: pipCount, filled: live && !inactive ? Math.round(pipCount * 0.66) : 0 };
-		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}|${style}|${pips.count}|${pips.filled}`;
+		// Animate: fuel sweeps to big changes; pips light or dim one at a time.
+		const now = Date.now();
+		const fTarget = fraction ?? 0;
+		if (inst.fTo === undefined || Math.abs(fTarget - inst.fTo) <= FUEL_JUMP) {
+			if (inst.fStart === undefined || now - inst.fStart >= ANIM_MS) inst.fStart = undefined;
+			inst.fFrom = inst.fStart === undefined ? fTarget : inst.fFrom;
+			inst.fTo = fTarget;
+		} else {
+			const shown = inst.fStart === undefined ? inst.fTo : inst.fFrom! + (inst.fTo - inst.fFrom!) * ease((now - inst.fStart) / ANIM_MS);
+			inst.fFrom = shown;
+			inst.fTo = fTarget;
+			inst.fStart = now;
+		}
+		const fuelT = inst.fStart === undefined ? 1 : (now - inst.fStart) / ANIM_MS;
+		const shownFraction = fraction === undefined && fuelT >= 1 ? undefined : inst.fFrom! + (inst.fTo - inst.fFrom!) * ease(fuelT);
+
+		if (inst.pTo === undefined) inst.pTo = pips.filled;
+		else if (pips.filled !== inst.pTo) {
+			inst.pFrom = inst.pTo;
+			inst.pTo = pips.filled;
+			inst.pStart = now;
+		}
+		const pipT = inst.pStart === undefined ? 1 : (now - inst.pStart) / ANIM_MS;
+		let levels: number[] | undefined;
+		if (pipT < 1 && inst.pFrom !== undefined) {
+			const from = inst.pFrom, to = inst.pTo, m = Math.abs(to - from);
+			levels = Array.from({ length: pipCount }, (_, i) => {
+				if (i >= Math.max(from, to)) return 0;
+				if (i < Math.min(from, to)) return 1;
+				// Each changing pip takes 40% of the time; they start in turn across the first 60%.
+				const k = to > from ? i - from : from - 1 - i;
+				const local = Math.max(0, Math.min(1, (pipT - (k / Math.max(1, m)) * 0.6) / 0.4));
+				return to > from ? local : 1 - local;
+			});
+		} else inst.pStart = undefined;
+		const animating = fuelT < 1 || levels !== undefined;
+		if (animating) inst.animTimer ??= setInterval(() => this.render(inst), 40);
+		else if (inst.animTimer) {
+			clearInterval(inst.animTimer);
+			inst.animTimer = undefined;
+		}
+		const drawnPips = { ...pips, levels };
+
+		const key = `${shownFraction?.toFixed(3)}|${levels?.map((l) => l.toFixed(2)).join(",")}|${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}|${style}|${pips.count}|${pips.filled}`;
 		if (key === inst.lastKey) return;
 		inst.lastKey = key;
-		void inst.action.setImage(renderGauge({ style, pips, fraction, valueText, icon, segments, partial, level, inactive, colors, fade: offlineOpacityOf(s.offlineOpacity), pulse }));
+		void inst.action.setImage(renderGauge({ style, pips: drawnPips, fraction: shownFraction, valueText, icon, segments, partial, level, inactive, colors, fade: offlineOpacityOf(s.offlineOpacity), pulse }));
 	}
 }
