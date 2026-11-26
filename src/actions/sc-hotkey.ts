@@ -20,8 +20,10 @@ import type { JsonValue } from "@elgato/utils";
 import { Keyboard, parseKeys, Step } from "../input/keyboard";
 import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
-import { formatValue, renderKey } from "../render/key-image";
-import { isOn } from "./on-off";
+import { formatValue } from "../render/key-image";
+import { renderHotkey, HotkeyPhase } from "../render/hotkey-face";
+import { HotkeyIcon, HOTKEY_ICONS } from "../render/icons";
+import { headingOn, isOn, isTransition, stateWord } from "./on-off";
 import { HOTKEY_PRESETS } from "../presets";
 
 type HotkeySettings = {
@@ -43,9 +45,17 @@ type HotkeySettings = {
 	ensure?: "none" | "on" | "off";
 	verify?: boolean;
 	showValue?: boolean;
+	/** "auto" (default) = the preset's icon. */
+	icon?: HotkeyIcon | "auto";
+	/** Background while a system is moving (DEPLOYING, RETRACTING…). */
+	busyColor?: string;
 };
 
-type Phase = "on" | "off" | "offline";
+type Phase = HotkeyPhase;
+
+/** Cog animation: ~8 frames a second, 15° a frame (the cog has 8 teeth, so it looks smooth). */
+const COG_FRAME_MS = 125;
+const COG_STEP = 15;
 
 interface Instance {
 	action: { setImage(image?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
@@ -57,6 +67,9 @@ interface Instance {
 	value?: Leaf;
 	pressSeq: number;
 	changedSincePress: boolean;
+	icon: HotkeyIcon;
+	cogAngle: number;
+	cogTimer?: NodeJS.Timeout;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -74,13 +87,15 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 
 	override onWillAppear(ev: WillAppearEvent<HotkeySettings>): void {
 		if (!ev.action.isKey()) return;
-		const inst: Instance = { action: ev.action, settings: {}, steps: [], pressSeq: 0, changedSincePress: false };
+		const inst: Instance = { action: ev.action, settings: {}, steps: [], pressSeq: 0, changedSincePress: false, icon: "power", cogAngle: 0 };
 		this.instances.set(ev.action.id, inst);
 		this.configure(inst, ev.payload.settings);
 	}
 
 	override onWillDisappear(ev: WillDisappearEvent<HotkeySettings>): void {
-		this.instances.get(ev.action.id)?.unsubscribe?.();
+		const inst = this.instances.get(ev.action.id);
+		inst?.unsubscribe?.();
+		if (inst) this.stopCog(inst);
 		this.instances.delete(ev.action.id);
 	}
 
@@ -100,8 +115,10 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.changedSincePress = false;
 
 		const tag = this.describe(inst);
-		if (ensure !== "none" && before === ensure) {
-			streamDeck.logger.debug(`${tag}: already ${before}, not pressing`);
+		// Mid-transition, "where it's heading" counts: DEPLOYING is already on its way to ON.
+		const effective = before === "busy" ? (headingOn(inst.value as string) ? "on" : "off") : before;
+		if (ensure !== "none" && effective === ensure) {
+			streamDeck.logger.debug(`${tag}: already ${before === "busy" ? `going ${effective}` : before}, not pressing`);
 			return void ev.action.showOk();
 		}
 		streamDeck.logger.debug(`${tag}: ${pressMode} "${inst.settings.keys}" (state ${before})`);
@@ -143,6 +160,8 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.settings = preset
 			? { ...settings, field: preset.field, onValues: preset.onValues ?? "", onLabel: settings.onLabel || preset.onLabel, offLabel: settings.offLabel || preset.offLabel }
 			: settings;
+		inst.icon = settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon) ? settings.icon : (preset?.icon ?? "power");
+		this.stopCog(inst);
 		try {
 			inst.steps = settings.keys ? parseKeys(settings.keys) : [];
 		} catch (err) {
@@ -175,7 +194,22 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		if (!field) return "off";
 		const v = inst.value;
 		if (v === undefined || this.telemetry.status !== "live") return "offline";
+		if (isTransition(v)) return "busy";
 		return isOn(v, onValues) ? "on" : "off";
+	}
+
+	/** Spins the cog while busy: redraws every COG_FRAME_MS until the state settles. */
+	private startCog(inst: Instance): void {
+		if (inst.cogTimer) return;
+		inst.cogTimer = setInterval(() => {
+			inst.cogAngle = (inst.cogAngle + COG_STEP) % 360;
+			this.render(inst);
+		}, COG_FRAME_MS);
+	}
+
+	private stopCog(inst: Instance): void {
+		clearInterval(inst.cogTimer);
+		inst.cogTimer = undefined;
 	}
 
 	private render(inst: Instance): void {
@@ -184,14 +218,24 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const live = this.telemetry.status === "live";
 		let image: string;
 
+		if (phase === "busy") this.startCog(inst);
+		else this.stopCog(inst);
+
 		if (phase === "on" && s.onImage) image = s.onImage;
 		else if (phase === "off" && s.offImage) image = s.offImage;
 		else {
 			const label =
-				phase === "offline" ? "OFFLINE" : phase === "on" ? (s.onLabel ?? "ON") : s.offLabel ?? (s.field ? "OFF" : s.keys ?? "SET KEYS");
-			const color = phase === "offline" ? "#2a3038" : phase === "on" ? (s.onColor ?? "#1f7a3a") : (s.offColor ?? "#3a434d");
+				phase === "offline" ? "OFFLINE"
+				: phase === "busy" ? stateWord(inst.value)
+				: phase === "on" ? (s.onLabel ?? "ON")
+				: s.offLabel ?? (s.field ? "OFF" : s.keys ?? "SET KEYS");
+			const color =
+				phase === "offline" ? "#2a3038"
+				: phase === "busy" ? (s.busyColor ?? "#8a6414")
+				: phase === "on" ? (s.onColor ?? "#1f7a3a")
+				: (s.offColor ?? "#3a434d");
 			const value = s.showValue && phase !== "offline" ? formatValue(inst.value) : undefined;
-			image = renderKey({ label, color, value, live });
+			image = renderHotkey({ phase, icon: inst.icon, label, color, value, live, cogAngle: inst.cogAngle });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device

@@ -56,7 +56,28 @@
 		</sdpi-item>
 
 		<details>
-			<summary>Appearance: labels, colours, images</summary>
+			<summary>Appearance: icon, labels, colours, images</summary>
+			<sdpi-item label="Icon">
+				<sdpi-select setting="icon" default="auto">
+					<option value="auto">From the button choice</option>
+					<option value="gear">Landing gear</option>
+					<option value="lights">Lights</option>
+					<option value="vtol">VTOL</option>
+					<option value="boost">Boost</option>
+					<option value="engines">Engines</option>
+					<option value="shields">Shields</option>
+					<option value="weapons">Weapons</option>
+					<option value="coolers">Coolers</option>
+					<option value="quantum">Quantum</option>
+					<option value="coupled">Coupled</option>
+					<option value="cruise">Cruise control</option>
+					<option value="limiter">Speed limiter</option>
+					<option value="gsafe">G-safe</option>
+					<option value="gimbals">Gimbals</option>
+					<option value="power">Power</option>
+				</sdpi-select>
+			</sdpi-item>
+			<sdpi-item label="Working colour"><sdpi-color setting="busyColor" default="#8a6414"></sdpi-color></sdpi-item>
 			<sdpi-item label="ON label"><sdpi-textfield setting="onLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
 			<sdpi-item label="ON colour"><sdpi-color setting="onColor" default="#1f7a3a"></sdpi-color></sdpi-item>
 			<sdpi-item label="ON image"><sdpi-file setting="onImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>

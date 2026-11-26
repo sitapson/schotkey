@@ -6,6 +6,7 @@
  * the old behaviour: the user picks the field themselves under Advanced.
  */
 import type { GaugeIcon } from "./render/gauge";
+import type { HotkeyIcon } from "./render/icons";
 
 export interface GaugePreset {
 	field: string;
@@ -57,25 +58,26 @@ export const GAUGE_PRESETS: Record<string, GaugePreset> = {
 
 export interface HotkeyPreset {
 	field: string;
-	/** Values that mean ON; blank = true / non-zero. */
+	/** Values that mean ON; blank = true / non-zero. In-between states (DEPLOYING…) show a spinning cog. */
 	onValues?: string;
 	onLabel: string;
 	offLabel: string;
+	icon: HotkeyIcon;
 }
 
 export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
-	gear: { field: "vehicle.state.flight.state.gear", onValues: "DEPLOYED, DEPLOYING", onLabel: "GEAR DOWN", offLabel: "GEAR UP" },
-	lights: { field: "vehicle.state.lights_enabled", onLabel: "LIGHTS ON", offLabel: "LIGHTS OFF" },
-	vtol: { field: "vehicle.state.flight.state.vtol", onValues: "DEPLOYED, DEPLOYING", onLabel: "VTOL ON", offLabel: "VTOL OFF" },
-	engines: { field: "vehicle.state.power.engines", onLabel: "ENGINES ON", offLabel: "ENGINES OFF" },
-	shields: { field: "vehicle.state.power.shield_generators", onLabel: "SHIELDS ON", offLabel: "SHIELDS OFF" },
-	weapons: { field: "vehicle.state.power.weapons", onLabel: "WEAPONS ON", offLabel: "WEAPONS OFF" },
-	coolers: { field: "vehicle.state.power.coolers", onLabel: "COOLERS ON", offLabel: "COOLERS OFF" },
-	quantum: { field: QDRV, onValues: QDRV_ON, onLabel: "QT ON", offLabel: "QT OFF" },
-	coupled: { field: "vehicle.state.flight.settings.ifcs_coupled.active", onLabel: "COUPLED", offLabel: "DECOUPLED" },
-	cruise: { field: "vehicle.state.flight.settings.ifcs_cruise_mode.active", onLabel: "CRUISE ON", offLabel: "CRUISE OFF" },
-	limiter: { field: "vehicle.state.flight.settings.ifcs_speed_limiter.active", onLabel: "LIMITER ON", offLabel: "LIMITER OFF" },
-	gsafe: { field: "vehicle.state.flight.settings.ifcs_g_safe.active", onLabel: "G-SAFE ON", offLabel: "G-SAFE OFF" },
-	gimbals: { field: "weapons.settings.gimbals_locked", onLabel: "GIMBALS LOCKED", offLabel: "GIMBALS FREE" },
-	boost: { field: "vehicle.state.flight.instruments.boost.engaged", onLabel: "BOOST", offLabel: "BOOST" },
+	gear: { field: "vehicle.state.flight.state.gear", onValues: "DEPLOYED", onLabel: "GEAR DOWN", offLabel: "GEAR UP", icon: "gear" },
+	lights: { field: "vehicle.state.lights_enabled", onLabel: "LIGHTS ON", offLabel: "LIGHTS OFF", icon: "lights" },
+	vtol: { field: "vehicle.state.flight.state.vtol", onValues: "DEPLOYED", onLabel: "VTOL ON", offLabel: "VTOL OFF", icon: "vtol" },
+	engines: { field: "vehicle.state.power.engines", onLabel: "ENGINES ON", offLabel: "ENGINES OFF", icon: "engines" },
+	shields: { field: "vehicle.state.power.shield_generators", onLabel: "SHIELDS ON", offLabel: "SHIELDS OFF", icon: "shields" },
+	weapons: { field: "vehicle.state.power.weapons", onLabel: "WEAPONS ON", offLabel: "WEAPONS OFF", icon: "weapons" },
+	coolers: { field: "vehicle.state.power.coolers", onLabel: "COOLERS ON", offLabel: "COOLERS OFF", icon: "coolers" },
+	quantum: { field: QDRV, onValues: QDRV_ON, onLabel: "QT ON", offLabel: "QT OFF", icon: "quantum" },
+	coupled: { field: "vehicle.state.flight.settings.ifcs_coupled.active", onLabel: "COUPLED", offLabel: "DECOUPLED", icon: "coupled" },
+	cruise: { field: "vehicle.state.flight.settings.ifcs_cruise_mode.active", onLabel: "CRUISE ON", offLabel: "CRUISE OFF", icon: "cruise" },
+	limiter: { field: "vehicle.state.flight.settings.ifcs_speed_limiter.active", onLabel: "LIMITER ON", offLabel: "LIMITER OFF", icon: "limiter" },
+	gsafe: { field: "vehicle.state.flight.settings.ifcs_g_safe.active", onLabel: "G-SAFE ON", offLabel: "G-SAFE OFF", icon: "gsafe" },
+	gimbals: { field: "weapons.settings.gimbals_locked", onLabel: "GIMBALS LOCKED", offLabel: "GIMBALS FREE", icon: "gimbals" },
+	boost: { field: "vehicle.state.flight.instruments.boost.engaged", onLabel: "BOOST ON", offLabel: "BOOST", icon: "boost" },
 };
