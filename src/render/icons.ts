@@ -2,6 +2,7 @@
  * Line icons for SC Hotkey keys. Each is drawn in a 48×48 box (centre 24,24) with strokes,
  * so iconSvg() can place and scale it anywhere on a key.
  */
+import { userIconSvg } from "./user-icons";
 
 export type HotkeyIcon =
 	| "gear"
@@ -56,8 +57,10 @@ const PATHS: Record<HotkeyIcon, string> = {
 	power: `<path d="M24 4v18"/><path d="M14 10a16 16 0 1 0 20 0"/>`,
 };
 
-/** An icon centred at (cx, cy), `size` px across, in `color`. */
+/** An icon centred at (cx, cy), `size` px across, in `color`. A supplied SVG icon wins over the built-in one. */
 export function iconSvg(icon: HotkeyIcon, color: string, cx: number, cy: number, size: number): string {
+	const supplied = userIconSvg(icon, color, cx, cy, size);
+	if (supplied) return supplied;
 	const s = size / 48;
 	return (
 		`<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s})" fill="none" stroke="${color}" color="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">` +

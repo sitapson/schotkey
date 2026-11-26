@@ -4,6 +4,7 @@
 
 - **SC Hotkey icons:** every button shows an icon for its system (15 drawn icons; choose under Appearance, or it follows the button choice).
 - **Working state:** while something moves (DEPLOYING, RETRACTING, OPENING, CLOSING) the key shows a spinning cog with that word, in an amber 'working' colour you can change.
+- **Your own icons:** SVGs in `com.sctelemetry.deck.sdPlugin/imgs/icons/` (20 supplied). The landing gear button uses `landing-gear.svg`; the artwork is measured (`npm run measure-icons` writes `bounds.json`) so it's centred and sized to fill the icon area, and recoloured per state.
 - Gear and VTOL now count only DEPLOYED as ON; "only press if" treats DEPLOYING as already heading ON.
 
 ## 0.1.0 (26 Nov 2026)

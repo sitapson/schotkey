@@ -6,6 +6,7 @@ import { ScGauge } from "./actions/sc-gauge";
 import { ScHotkey } from "./actions/sc-hotkey";
 import { TelemetryStatus } from "./actions/telemetry-status";
 import { Keyboard } from "./input/keyboard";
+import { setUserIconDir } from "./render/user-icons";
 import { TelemetryClient, TelemetryConfig } from "./telemetry/client";
 
 // bin/plugin.js -> the .sdPlugin folder
@@ -24,6 +25,8 @@ function loadConfig(): TelemetryConfig {
 		return defaults;
 	}
 }
+
+setUserIconDir(join(pluginDir, "imgs", "icons"));
 
 const config = loadConfig();
 streamDeck.logger.setLevel(config.debug ? "debug" : "info");

@@ -13,7 +13,8 @@
     "fake-game": "node dev/fake-game-server.mjs",
     "logs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/watch-logs.ps1",
     "extract-schema": "node scripts/extract-schema.mjs",
-    "list-fields": "node scripts/list-fields.mjs"
+    "list-fields": "node scripts/list-fields.mjs",
+    "measure-icons": "node scripts/measure-icons.mjs"
   },
   "dependencies": {
     "@elgato/streamdeck": "^3.0.0",
