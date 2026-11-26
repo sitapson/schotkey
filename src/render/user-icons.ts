@@ -201,8 +201,10 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
 
 	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
-	// starting bottom-left and open at the bottom, 4° gaps, square ends.
-	const CX = 72, CY = 66, R = 44, WIDTH = 9, START = 225, SWEEP = 270, GAP = 4;
+	// starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear space
+	// between pips (the arcs are shortened so the round caps don't eat into the gap).
+	const CX = 72, CY = 66, R = 44, WIDTH = 9, START = 225, SWEEP = 270, GAP = 9;
+	const CAP = ((WIDTH / 2) / R) * (180 / Math.PI); // how far a round cap reaches, in degrees
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const per = SWEEP / n;
 	const at = (deg: number) => {
@@ -211,10 +213,12 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	};
 	let ring = "";
 	for (let i = 0; i < n; i++) {
-		const a0 = START + i * per + GAP / 2;
-		const a1 = START + (i + 1) * per - GAP / 2;
+		// The arc's outer ends line up with the gauge's; only the gaps between pips grow.
+		const a0 = START + i * per + (i === 0 ? CAP : GAP / 2 + CAP);
+		const a1 = START + (i + 1) * per - (i === n - 1 ? CAP : GAP / 2 + CAP);
+		if (a1 <= a0) continue;
 		const lit = i < filled;
-		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${color}" stroke-width="${WIDTH}"${lit ? "" : ` opacity="0.28"`}/>`;
+		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}/>`;
 	}
 
 	// The symbol keeps its size relative to the original bars, which circled the whole artwork:
