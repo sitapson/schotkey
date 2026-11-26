@@ -23,7 +23,6 @@ export function renderKey({ label, color, value, live }: KeyFace): string {
 		`<rect width="144" height="144" fill="#12171d"/>` +
 		`<rect x="6" y="6" width="132" height="132" rx="14" fill="${esc(color)}"/>` +
 		`<g fill="#fff" font-family="Segoe UI, Arial, sans-serif" font-weight="600" text-anchor="middle">${text}${valueText}</g>` +
-		`<circle cx="122" cy="22" r="6" fill="${live ? "#4cd964" : "#5b6570"}" stroke="#12171d" stroke-width="2"/>` +
 		`</svg>`;
 	return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`;
 }
