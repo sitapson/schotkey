@@ -12,8 +12,10 @@ export interface HotkeyFace {
 	icon: HotkeyIcon;
 	/** Background for this phase. */
 	color: string;
-	/** Icon colour for this phase (default white; grey when offline). */
+	/** Icon colour for this phase (default white). */
 	iconColor?: string;
+	/** Icon opacity, 0-1 (offline draws the icon faint). */
+	iconOpacity?: number;
 	/** Telemetry feed connected: small green dot, grey when not. */
 	live: boolean;
 	/** Cog rotation in degrees while busy. */
@@ -43,7 +45,7 @@ export function renderHotkey(face: HotkeyFace): string {
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
 		`<rect width="144" height="144" fill="#12171d"/>` +
 		`<rect x="6" y="6" width="132" height="132" rx="14" fill="${esc(face.color)}"/>` +
-		art +
+		(face.iconOpacity !== undefined && face.iconOpacity < 1 ? `<g opacity="${face.iconOpacity.toFixed(2)}">${art}</g>` : art) +
 		`</svg>`;
 	return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`;
 }

@@ -24,6 +24,7 @@ import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
 import { GaugeColors, GaugeIcon, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
+import { offlineOpacityOf } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
 
 type GaugeSettings = {
@@ -54,6 +55,8 @@ type GaugeSettings = {
 	/** true (default): the icon takes the gauge's current colour. false: it uses iconColor. */
 	iconFollows?: boolean;
 	iconColor?: string;
+	/** Offline opacity, percent (default 20). */
+	offlineOpacity?: number | string;
 };
 
 const hex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?([0-9a-f]{2})?$/i.test(v.trim()) ? v.trim() : undefined);
@@ -289,9 +292,9 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 
 		// Only redraw when what's on the key would change (fuel creeps in tiny steps at ~18 Hz).
 		const colors = colorsOf(s);
-		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}`;
+		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}`;
 		if (key === inst.lastKey) return;
 		inst.lastKey = key;
-		void inst.action.setImage(renderGauge({ fraction, valueText, icon, segments, partial, level, inactive, colors }));
+		void inst.action.setImage(renderGauge({ fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity) }));
 	}
 }
