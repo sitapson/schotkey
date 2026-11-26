@@ -55,9 +55,12 @@ type HotkeySettings = {
 
 type Phase = HotkeyPhase;
 
-/** Cog animation: ~8 frames a second, 15° a frame (the cog has 8 teeth, so it looks smooth). */
-const COG_FRAME_MS = 125;
-const COG_STEP = 15;
+/** Working animation: ~12 frames a second. The cog turns 10° a frame. */
+const COG_FRAME_MS = 80;
+const COG_STEP = 10;
+/** Landing gear swing: timed, since the game only says DEPLOYING / RETRACTING, not how far along. */
+const GEAR_SWING_MS = 2500;
+const GEAR_UP_ANGLE = -85;
 
 interface Instance {
 	action: { setImage(image?: string): Promise<void>; setTitle(title?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
@@ -74,6 +77,8 @@ interface Instance {
 	cogTimer?: NodeJS.Timeout;
 	/** Title last set by the plugin; undefined = the user's own title. */
 	lastTitle?: string;
+	/** When the current DEPLOYING / RETRACTING began (for the gear swing). */
+	busySince?: number;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -232,8 +237,21 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const live = this.telemetry.status === "live";
 		let image: string;
 
-		if (phase === "busy") this.startCog(inst);
-		else this.stopCog(inst);
+		if (phase === "busy") {
+			this.startCog(inst);
+			inst.busySince ??= Date.now();
+		} else {
+			this.stopCog(inst);
+			inst.busySince = undefined;
+		}
+		// Landing gear swings instead of showing the cog: eased in and out like an actuator, holding
+		// the end pose if the game takes longer than GEAR_SWING_MS to report it finished.
+		let gearAngle: number | undefined;
+		if (phase === "busy" && inst.icon === "gear" && inst.busySince !== undefined) {
+			const t = Math.min(1, (Date.now() - inst.busySince) / GEAR_SWING_MS);
+			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+			gearAngle = GEAR_UP_ANGLE * (headingOn(inst.value as string) ? 1 - eased : eased);
+		}
 
 		// The state in words. Not drawn on the image; optionally shown as the key's title.
 		const label =
@@ -252,7 +270,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
-			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle });
+			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device
