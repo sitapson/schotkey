@@ -106,6 +106,25 @@ com.sctelemetry.deck.sdPlugin/
   manifest.json, ui/hotkey.html (settings panel), imgs/, telemetry.config.json
 ```
 
+## Versions
+
+Each finished version is a git tag (`v0.1.0`, …), listed with what's in it in [CHANGELOG.md](CHANGELOG.md). Work in progress happens on `main`.
+
+**Go back to a version:**
+
+```
+git checkout v0.1.0          # look at / build that version (detached)
+npm install
+npm run build                # plugin in Stream Deck now runs v0.1.0
+git checkout main            # back to the latest work
+```
+
+**Start over from a version** (throw away newer work on `main`): `git reset --hard v0.1.0`. This discards everything after that tag, so only do it on purpose.
+
+**Just reinstall it:** `releases/sc-telemetry-deck-v0.1.0.streamDeckPlugin` (local, not in git) installs that version with a double-click. Any tag can be packed again with `npx streamdeck pack com.sctelemetry.deck.sdPlugin -o releases` after checking it out and building.
+
+**Save a new version:** set the version in `package.json` and `com.sctelemetry.deck.sdPlugin/manifest.json`, update CHANGELOG.md, commit, then `git tag -a vX.Y.Z -m "..."` and `git push --follow-tags`.
+
 ## Ideas for next steps
 
 - Multi-state buttons (NAV / SCM / QT), threshold colours (shield % < 25 → red)
