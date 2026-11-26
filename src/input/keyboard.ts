@@ -30,10 +30,21 @@ const SCANCODES: Record<string, [number, boolean?]> = {
 	// F13–F24 are unused by most apps: great for Stream Deck-only binds in SC.
 	F13: [0x64], F14: [0x65], F15: [0x66], F16: [0x67], F17: [0x68], F18: [0x69], F19: [0x6a], F20: [0x6b], F21: [0x6c], F22: [0x6d], F23: [0x6e], F24: [0x76],
 	RCTRL: [0x1d, true], RALT: [0x38, true], NUMENTER: [0x1c, true], NUMDIVIDE: [0x35, true],
+	LWIN: [0x5b, true], RWIN: [0x5c, true],
 	INSERT: [0x52, true], DELETE: [0x53, true], HOME: [0x47, true], END: [0x4f, true], PAGEUP: [0x49, true], PAGEDOWN: [0x51, true],
 	UP: [0x48, true], DOWN: [0x50, true], LEFT: [0x4b, true], RIGHT: [0x4d, true],
 };
-const ALIASES: Record<string, string> = { ALT: "LALT", CTRL: "LCTRL", CONTROL: "LCTRL", SHIFT: "LSHIFT", RETURN: "ENTER", DEL: "DELETE", INS: "INSERT", PGUP: "PAGEUP", PGDN: "PAGEDOWN" };
+const ALIASES: Record<string, string> = {
+	ALT: "LALT", CTRL: "LCTRL", CONTROL: "LCTRL", SHIFT: "LSHIFT", WIN: "LWIN", WINDOWS: "LWIN",
+	// Left / right written out, or with the side after: "Right Alt", "Alt Right", "R-Alt", "AltGr"
+	LEFTALT: "LALT", RIGHTALT: "RALT", ALTLEFT: "LALT", ALTRIGHT: "RALT", ALTGR: "RALT",
+	LEFTCTRL: "LCTRL", RIGHTCTRL: "RCTRL", CTRLLEFT: "LCTRL", CTRLRIGHT: "RCTRL",
+	LCONTROL: "LCTRL", RCONTROL: "RCTRL", LEFTCONTROL: "LCTRL", RIGHTCONTROL: "RCTRL",
+	LEFTSHIFT: "LSHIFT", RIGHTSHIFT: "RSHIFT", SHIFTLEFT: "LSHIFT", SHIFTRIGHT: "RSHIFT",
+	LEFTWIN: "LWIN", RIGHTWIN: "RWIN",
+	RETURN: "ENTER", DEL: "DELETE", INS: "INSERT", PGUP: "PAGEUP", PGDN: "PAGEDOWN", ESCAPE: "ESC",
+	SPACEBAR: "SPACE", CAPS: "CAPSLOCK", BKSP: "BACKSPACE",
+};
 
 /** A sequence of combos, e.g. "LAlt+N" or "LCtrl+F13, wait 200, N". */
 export type Step = { combo: Scan[] } | { wait: number };
@@ -48,7 +59,10 @@ export function parseKeys(spec: string): Step[] {
 			if (wait) return { wait: Number(wait[1]) };
 			return {
 				combo: part.split("+").map((name) => {
-					const key = name.trim().toUpperCase().replace(/\s+/g, "");
+					// Ignore case, spaces, hyphens and underscores: "R-Alt", "Right Alt", "r_alt" all mean
+					// RALT. A lone "-" is the minus key.
+					const raw = name.trim();
+					const key = raw === "-" ? "MINUS" : raw.toUpperCase().replace(/[\s_-]+/g, "");
 					const entry = SCANCODES[ALIASES[key] ?? key];
 					if (!entry) throw new Error(`Unknown key "${name.trim()}"`);
 					return { code: entry[0], extended: !!entry[1] };
