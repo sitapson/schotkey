@@ -185,53 +185,45 @@ export function animatedDoorsSvg(color: string, cx: number, cy: number, size: nu
  * Your power-*.svg icons (a symbol inside four bars that stand for power pips), with the four
  * bars replaced by a ring of `count` pips, `filled` of them lit. The first four <path>s in those
  * files are the bars; everything after is the symbol (bolt, shield…), which is kept as drawn.
- * Pips fill clockwise from the bottom. Unlit pips are drawn faint in the same colour.
+ * The pips are an arc the same size and shape as SC Gauge's ring, filling clockwise from the
+ * bottom-left. Unlit pips are drawn faint in the same colour.
  */
 export const PIP_ICON_FILES: Record<string, string> = {
 	shippower: "power.svg",
 	shields: "power-shields.svg",
 };
 
-export function pipIconSvg(icon: string, color: string, cx: number, cy: number, size: number, count: number, filled: number): string | null {
+export function pipIconSvg(icon: string, color: string, count: number, filled: number): string | null {
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
 	let removed = 0;
 	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
-	const b = boxOf(file);
-	const s = size / Math.max(b.w, b.h);
-	const tx = cx - (b.x + b.w / 2) * s;
-	const ty = cy - (b.y + b.h / 2) * s;
 
-	// The ring sits where the bars were: the outer edge of the artwork.
+	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
+	// starting bottom-left and open at the bottom, 4° gaps, square ends.
+	const CX = 72, CY = 66, R = 44, WIDTH = 9, START = 225, SWEEP = 270, GAP = 4;
 	const n = Math.max(1, Math.min(12, Math.round(count)));
-	const width = size * 0.07;
-	const r = size / 2 - width / 2;
-	const per = 360 / n;
-	const gap = n === 1 ? 0 : Math.min(per * 0.3, 40);
+	const per = SWEEP / n;
 	const at = (deg: number) => {
 		const t = ((deg - 90) * Math.PI) / 180;
-		return `${(cx + r * Math.cos(t)).toFixed(2)} ${(cy + r * Math.sin(t)).toFixed(2)}`;
+		return `${(CX + R * Math.cos(t)).toFixed(2)} ${(CY + R * Math.sin(t)).toFixed(2)}`;
 	};
 	let ring = "";
 	for (let i = 0; i < n; i++) {
+		const a0 = START + i * per + GAP / 2;
+		const a1 = START + (i + 1) * per - GAP / 2;
 		const lit = i < filled;
-		const style = `fill="none" stroke="${color}" stroke-width="${width.toFixed(2)}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}`;
-		if (n === 1) {
-			ring += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(2)}" ${style}/>`;
-			continue;
-		}
-		// Start at the bottom (180°) and go clockwise; leave room for the round caps.
-		const cap = (width / 2 / r) * (180 / Math.PI);
-		const a0 = 180 + i * per + gap / 2 + cap;
-		const a1 = 180 + (i + 1) * per - gap / 2 - cap;
-		if (a1 <= a0) continue;
-		ring += `<path d="M${at(a0)}A${r.toFixed(2)} ${r.toFixed(2)} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" ${style}/>`;
+		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${color}" stroke-width="${WIDTH}"${lit ? "" : ` opacity="0.28"`}/>`;
 	}
-	return (
-		ring +
-		`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`
-	);
+
+	// The symbol keeps its size relative to the original bars, which circled the whole artwork:
+	// the artwork box maps onto the inside of the arc.
+	const b = boxOf(file);
+	const s = (2 * R - WIDTH) / Math.max(b.w, b.h);
+	const tx = CX - (b.x + b.w / 2) * s;
+	const ty = CY - (b.y + b.h / 2) * s;
+	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
 /**

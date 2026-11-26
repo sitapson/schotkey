@@ -39,7 +39,7 @@ export function renderHotkey(face: HotkeyFace): string {
 		: face.icon === "lights" ? animatedLightsSvg(fg, 72, 72, 80, a)
 		: face.icon === "doors" ? animatedDoorsSvg(fg, 72, 72, 80, a)
 		: null;
-	const pipped = face.pips ? pipIconSvg(face.icon, fg, 72, 72, 84, face.pips.count, face.pips.filled) : null;
+	const pipped = face.pips ? pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled) : null;
 	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
