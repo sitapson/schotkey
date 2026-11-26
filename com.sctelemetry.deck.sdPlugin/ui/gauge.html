@@ -22,6 +22,16 @@
 				<option value="custom">Custom (choose a field below)</option>
 			</sdpi-select>
 		</sdpi-item>
+		<sdpi-item label="Style">
+			<sdpi-select setting="style" default="v1">
+				<option value="v1">Classic: ring and %</option>
+				<option value="v2">Split: pips on top, fuel below, no text</option>
+				<option value="v3">Double: fuel ring with pips inside</option>
+			</sdpi-select>
+		</sdpi-item>
+		<sdpi-item label="Pips">
+			<sdpi-range setting="pips" min="1" max="12" step="1" default="4" showlabels></sdpi-range>
+		</sdpi-item>
 		<sdpi-item label="Key to press">
 			<sdpi-textfield setting="keys" placeholder="e.g. N, RAlt+D, LCtrl+Shift+F13" title="Keys joined with +. Modifiers: LAlt / RAlt (AltGr), LCtrl / RCtrl, LShift / RShift, LWin. Plain Alt, Ctrl, Shift mean the left one. Sequence: LCtrl+K, wait 200, K"></sdpi-textfield>
 		</sdpi-item>

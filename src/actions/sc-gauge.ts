@@ -22,7 +22,7 @@ import type { JsonValue } from "@elgato/utils";
 import { Keyboard, parseKeys, Step } from "../input/keyboard";
 import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
-import { GaugeColors, GaugeIcon, renderGauge } from "../render/gauge";
+import { GaugeColors, GaugeIcon, GaugeStyle, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
 import { offlineOpacityOf, PENDING_MS, pulseAt } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
@@ -57,6 +57,10 @@ type GaugeSettings = {
 	iconColor?: string;
 	/** Offline opacity, percent (default 20). */
 	offlineOpacity?: number | string;
+	/** Look: v1 classic ring, v2 split pips/fuel, v3 fuel ring with inner pips. */
+	style?: GaugeStyle;
+	/** v2 / v3: how many pips in the pip arc (1-12). */
+	pips?: number | string;
 };
 
 const hex = (v: unknown) => (typeof v === "string" && /^#[0-9a-f]{3}([0-9a-f]{3})?([0-9a-f]{2})?$/i.test(v.trim()) ? v.trim() : undefined);
@@ -309,9 +313,14 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 
 		// Only redraw when what's on the key would change (fuel creeps in tiny steps at ~18 Hz).
 		const colors = colorsOf(s);
-		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}`;
+		// Pips: the game doesn't report pip levels, so 66% are lit while the gauge's system is on
+		// (no state field = always on), none while it's off or there's no data.
+		const style: GaugeStyle = s.style === "v2" || s.style === "v3" ? s.style : "v1";
+		const pipCount = Math.max(1, Math.min(12, Math.round(num(s.pips, 4))));
+		const pips = { count: pipCount, filled: live && !inactive ? Math.round(pipCount * 0.66) : 0 };
+		const key = `${fraction}|${valueText}|${level}|${segments}|${partial}|${icon}|${inactive}|${JSON.stringify(colors)}|${s.offlineOpacity}|${pulse?.toFixed(2)}|${style}|${pips.count}|${pips.filled}`;
 		if (key === inst.lastKey) return;
 		inst.lastKey = key;
-		void inst.action.setImage(renderGauge({ fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity), pulse }));
+		void inst.action.setImage(renderGauge({ style, pips, fraction, valueText, icon, segments, partial, level, inactive, colors, offlineOpacity: offlineOpacityOf(s.offlineOpacity), pulse }));
 	}
 }
