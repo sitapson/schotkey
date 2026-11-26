@@ -109,6 +109,49 @@ export function animatedGearSvg(color: string, cx: number, cy: number, size: num
 }
 
 /**
+ * Your headlights.svg split into lamp + four beams, so the beams can grow out of the lamp.
+ * Coordinates are that file's own (inside its group transform), so `amount` 1 matches the
+ * static icon exactly. `amount`: 0 = lights off (lamp only), 1 = all beams out. The beams grow
+ * one after another, top to bottom, each from the lamp face outwards.
+ */
+const LIGHTS_FILE = "headlights.svg";
+const LIGHTS_LAMP =
+	"m 13446.367,7975.7758 v 20.4 c -4,-0.3 -11.4,-1.4 -19.2,-5.6 -3.2,-1.7 -5.8,-3.6 -8,-5.5 -5.9,-5.1 -5.9,-13.7 0,-18.8 2.2,-1.9 4.8,-3.8 8,-5.5 7.8,-4.1 15.1,-5.2 19.2,-5.6 v 20.6";
+const LIGHTS_BEAMS = [
+	"11354.42,6258.91 11354.42,6263.51 11330.62,6266.01 11330.62,6261.41",
+	"11354.42,6269.51 11354.42,6274.21 11330.62,6276.71 11330.62,6272.11",
+	"11354.42,6280.21 11354.42,6284.91 11330.62,6287.41 11330.62,6282.81",
+	"11354.42,6290.91 11354.42,6295.61 11330.62,6298.11 11330.62,6293.51",
+];
+const BEAM_BASE_X = 11330.62; // the end of each beam nearest the lamp
+
+export function animatedLightsSvg(color: string, cx: number, cy: number, size: number, amount: number): string | null {
+	if (!load(LIGHTS_FILE)) return null;
+	const b = boxOf(LIGHTS_FILE);
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
+	let beams = "";
+	LIGHTS_BEAMS.forEach((points, i) => {
+		// Each beam has its own slice of the animation, overlapping the next for a smooth ripple.
+		const start = i * 0.15;
+		const k = Math.max(0, Math.min(1, (amount - start) / 0.55));
+		if (k <= 0.001) return;
+		beams +=
+			`<g transform="matrix(0.39677592,0,0,1,8959.2497,1695.9658)">` +
+			`<polygon points="${points}" fill="${color}" transform="translate(${BEAM_BASE_X} 0) scale(${k.toFixed(3)} 1) translate(${-BEAM_BASE_X} 0)"/>` +
+			`</g>`;
+	});
+	return (
+		`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">` +
+		`<g transform="matrix(0.91530477,0,0,0.91530477,-12256.777,-7255.5055)">` +
+		`<path d="${LIGHTS_LAMP}" fill="${color}"/>` +
+		beams +
+		`</g></g>`
+	);
+}
+
+/**
  * A supplied icon whose artwork is centred at (cx, cy) and scaled to fit a `size`×`size` box,
  * in `color`; null if there isn't one.
  */

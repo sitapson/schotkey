@@ -63,6 +63,8 @@ const COG_STEP = 10;
 /** Landing gear swing: timed, since the game only says DEPLOYING / RETRACTING, not how far along. */
 const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
+/** Lights: beams grow out / shrink back over this long when switched. */
+const LIGHTS_MS = 1000;
 
 interface Instance {
 	action: { setImage(image?: string): Promise<void>; setTitle(title?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
@@ -81,6 +83,9 @@ interface Instance {
 	lastTitle?: string;
 	/** When the current DEPLOYING / RETRACTING began (for the gear swing). */
 	busySince?: number;
+	/** Last settled ON/OFF, and when it last flipped (for the lights animation). */
+	lastSteady?: "on" | "off";
+	flipSince?: number;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -184,6 +189,8 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.value = undefined;
 		inst.lastFace = undefined;
 		inst.lastPhase = undefined;
+		inst.lastSteady = undefined;
+		inst.flipSince = undefined;
 		streamDeck.logger.debug(`${this.describe(inst)}: configured (keys "${settings.keys ?? ""}", ${inst.steps.length} step(s))`);
 		const field = inst.settings.field;
 		if (field) {
@@ -239,13 +246,25 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const live = this.telemetry.status === "live";
 		let image: string;
 
-		if (phase === "busy") {
-			this.startCog(inst);
-			inst.busySince ??= Date.now();
-		} else {
-			this.stopCog(inst);
-			inst.busySince = undefined;
+		if (phase === "busy") inst.busySince ??= Date.now();
+		else inst.busySince = undefined;
+		// Note ON <-> OFF flips (not from offline or the first reading) to animate the switch.
+		if (phase === "on" || phase === "off") {
+			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = Date.now();
+			inst.lastSteady = phase;
 		}
+		// Lights: beams grow out when switched on and shrink back when switched off, then hold.
+		let lightAmount: number | undefined;
+		let animating = false;
+		if (inst.icon === "lights" && (phase === "on" || phase === "off")) {
+			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / LIGHTS_MS);
+			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
+			lightAmount = phase === "on" ? eased : 1 - eased;
+			animating = t < 1;
+		}
+		// One frame timer drives the cog, the gear swing and the lights.
+		if (phase === "busy" || animating) this.startCog(inst);
+		else this.stopCog(inst);
 		// Landing gear is drawn by pose: hanging down when deployed (ON), folded up when retracted
 		// (OFF), and swinging between the two while moving (eased like an actuator, holding the end
 		// pose if the game takes longer than GEAR_SWING_MS to report it finished).
@@ -277,7 +296,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
-			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle });
+			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle, gearAngle, lightAmount });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device
