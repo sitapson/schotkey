@@ -55,6 +55,9 @@
 		<sdpi-item label="Check it worked">
 			<sdpi-checkbox setting="verify" default="true" label="Show ⚠ if the press changed nothing"></sdpi-checkbox>
 		</sdpi-item>
+		<sdpi-item label="Title">
+			<sdpi-checkbox setting="stateTitle" label="Show state as title (GEAR DOWN, DEPLOYING…)"></sdpi-checkbox>
+		</sdpi-item>
 
 		<details>
 			<summary>Appearance: icon, labels, colours, images</summary>
@@ -100,7 +103,7 @@
 				<sdpi-range setting="longMs" min="300" max="3000" step="100" default="1000" showlabels></sdpi-range>
 			</sdpi-item>
 			<sdpi-item label="Show value">
-				<sdpi-checkbox setting="showValue" label="Print the live value on the key"></sdpi-checkbox>
+				<sdpi-checkbox setting="showValue" label="Add the live value to the title"></sdpi-checkbox>
 			</sdpi-item>
 		</details>
 	</body>

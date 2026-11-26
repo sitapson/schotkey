@@ -45,6 +45,8 @@ type HotkeySettings = {
 	ensure?: "none" | "on" | "off";
 	verify?: boolean;
 	showValue?: boolean;
+	/** Show the state ("GEAR DOWN", "DEPLOYING"…) as the key's Stream Deck title. */
+	stateTitle?: boolean;
 	/** "auto" (default) = the preset's icon. */
 	icon?: HotkeyIcon | "auto";
 	/** Background while a system is moving (DEPLOYING, RETRACTING…). */
@@ -58,7 +60,7 @@ const COG_FRAME_MS = 125;
 const COG_STEP = 15;
 
 interface Instance {
-	action: { setImage(image?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
+	action: { setImage(image?: string): Promise<void>; setTitle(title?: string): Promise<void>; showAlert(): Promise<void>; showOk(): Promise<void> };
 	settings: HotkeySettings;
 	steps: Step[];
 	unsubscribe?: () => void;
@@ -70,6 +72,8 @@ interface Instance {
 	icon: HotkeyIcon;
 	cogAngle: number;
 	cogTimer?: NodeJS.Timeout;
+	/** Title last set by the plugin; undefined = the user's own title. */
+	lastTitle?: string;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -212,6 +216,16 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.cogTimer = undefined;
 	}
 
+	/**
+	 * With "Show state as title" on, the key's title follows the state ("GEAR DOWN",
+	 * "DEPLOYING"…). Turning it off hands the title back to whatever the user typed in Stream Deck.
+	 */
+	private updateTitle(inst: Instance, title: string | undefined): void {
+		if (title === inst.lastTitle) return;
+		inst.lastTitle = title;
+		void (title === undefined ? inst.action.setTitle() : inst.action.setTitle(title));
+	}
+
 	private render(inst: Instance): void {
 		const s = inst.settings;
 		const phase = this.phase(inst);
@@ -221,21 +235,24 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		if (phase === "busy") this.startCog(inst);
 		else this.stopCog(inst);
 
+		// The state in words. Not drawn on the image; optionally shown as the key's title.
+		const label =
+			phase === "offline" ? "OFFLINE"
+			: phase === "busy" ? stateWord(inst.value)
+			: phase === "on" ? (s.onLabel ?? "ON")
+			: s.offLabel ?? (s.field ? "OFF" : s.keys ?? "SET KEYS");
+		const value = s.showValue && phase !== "offline" ? formatValue(inst.value) : undefined;
+		this.updateTitle(inst, s.stateTitle ? (value ? `${label}\n${value}` : label) : undefined);
+
 		if (phase === "on" && s.onImage) image = s.onImage;
 		else if (phase === "off" && s.offImage) image = s.offImage;
 		else {
-			const label =
-				phase === "offline" ? "OFFLINE"
-				: phase === "busy" ? stateWord(inst.value)
-				: phase === "on" ? (s.onLabel ?? "ON")
-				: s.offLabel ?? (s.field ? "OFF" : s.keys ?? "SET KEYS");
 			const color =
 				phase === "offline" ? "#2a3038"
 				: phase === "busy" ? (s.busyColor ?? "#8a6414")
 				: phase === "on" ? (s.onColor ?? "#1f7a3a")
 				: (s.offColor ?? "#3a434d");
-			const value = s.showValue && phase !== "offline" ? formatValue(inst.value) : undefined;
-			image = renderHotkey({ phase, icon: inst.icon, label, color, value, live, cogAngle: inst.cogAngle });
+			image = renderHotkey({ phase, icon: inst.icon, color, live, cogAngle: inst.cogAngle });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device

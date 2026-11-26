@@ -11,6 +11,7 @@ export const USER_ICON_FILES: Record<string, string> = {
 	gear: "landing-gear.svg",
 	lights: "headlights.svg",
 	shippower: "power.svg",
+	coupled: "coupled.svg",
 };
 
 const PAGE = 89.0625;
