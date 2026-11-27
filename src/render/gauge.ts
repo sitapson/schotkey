@@ -67,11 +67,17 @@ export const GAUGE_ICONS = {
 	comms: { name: "Comms", file: "comms.svg" },
 	pip: { name: "Ship marker", file: "pip.svg" },
 	tobii: { name: "Head tracking", file: "tobii.svg" },
-	tobii2: { name: "Head tracking (small)", file: "tobii2.svg" },
 	mirai: { name: "Mirai logo", file: "mirai.svg" },
 } as const satisfies Record<string, { name: string; file?: string; symbol?: boolean }>;
 
 export type GaugeIcon = keyof typeof GAUGE_ICONS | "none";
+/** Icons that were removed, and what keys still set to them show instead. */
+const RETIRED_ICONS: Record<string, GaugeIcon> = {
+	// The same artwork as tobii.svg, smaller on its page: identical once fitted to the icon boundary.
+	tobii2: "tobii",
+};
+/** A saved icon choice as a current icon id (retired ones mapped to their replacement). */
+export const currentIcon = (v: unknown): unknown => (typeof v === "string" && Object.hasOwn(RETIRED_ICONS, v) ? RETIRED_ICONS[v] : v);
 export const isGaugeIcon = (v: unknown): v is GaugeIcon => v === "none" || (typeof v === "string" && Object.hasOwn(GAUGE_ICONS, v));
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
 export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12" | "v13" | "v14" | "v15" | "v16" | "v17" | "v18" | "v19";

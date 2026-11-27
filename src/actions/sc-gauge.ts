@@ -22,7 +22,7 @@ import type { JsonValue } from "@elgato/utils";
 import { Keyboard, parseKeys, Step } from "../input/keyboard";
 import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
-import { GAUGE_STYLES, GaugeColors, GaugeIcon, GaugeStyle, isGaugeIcon, renderGauge } from "../render/gauge";
+import { currentIcon, GAUGE_STYLES, GaugeColors, GaugeIcon, GaugeStyle, isGaugeIcon, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
 import { offlineOpacityOf, PENDING_MS, pulseAt } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
@@ -110,7 +110,8 @@ interface Resolved {
  */
 function resolve(s: GaugeSettings): Resolved {
 	const preset = s.preset && s.preset !== "custom" ? GAUGE_PRESETS[s.preset] : undefined;
-	const chosenIcon = isGaugeIcon(s.icon) ? s.icon : undefined;
+	const icon = currentIcon(s.icon);
+	const chosenIcon = isGaugeIcon(icon) ? icon : undefined;
 	if (preset) {
 		return {
 			field: preset.field,

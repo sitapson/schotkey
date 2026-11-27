@@ -22,7 +22,7 @@ import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
 import { formatValue } from "../render/key-image";
 import { renderHotkey, HotkeyPhase } from "../render/hotkey-face";
-import { GaugeIcon, isGaugeIcon } from "../render/gauge";
+import { currentIcon, GaugeIcon, isGaugeIcon } from "../render/gauge";
 import { HotkeyIcon, HOTKEY_ICONS } from "../render/icons";
 import { headingOn, isOn, isTransition, stateWord } from "./on-off";
 import { HOTKEY_PRESETS } from "../presets";
@@ -240,7 +240,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.settings = preset
 			? { ...settings, field: preset.field, onValues: preset.onValues ?? "", onLabel: settings.onLabel || preset.onLabel, offLabel: settings.offLabel || preset.offLabel }
 			: settings;
-		const gaugeIcon = settings.icon?.startsWith("g:") ? settings.icon.slice(2) : undefined;
+		const gaugeIcon = settings.icon?.startsWith("g:") ? currentIcon(settings.icon.slice(2)) : undefined;
 		const auto = !settings.icon || settings.icon === "auto";
 		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : auto ? preset?.defaultIcon : undefined;
 		inst.icon = inst.gaugeIcon ? "power" : settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon as HotkeyIcon) ? (settings.icon as HotkeyIcon) : (preset?.icon ?? "power");
