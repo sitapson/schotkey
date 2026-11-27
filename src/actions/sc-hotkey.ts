@@ -88,6 +88,8 @@ const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 20
 const LOOP_ICONS: HotkeyIcon[] = ["gear", "lights", "lamp", "coupled"];
 /** Pause on the end pose between repeats, so a short animation reads as a repeat, not a flicker. */
 const LOOP_HOLD_MS = 250;
+/** Pips light or go out one at a time over this long (as on SC Gauge). */
+const PIP_ANIM_MS = 250;
 /** Icons that animate between their OFF and ON pose when the state flips. */
 const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp", "coupled"];
 /** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
@@ -141,6 +143,10 @@ interface Instance {
 	/** Pressed: replaying the switch animation towards `loopTo` until the game reports it. */
 	loopSince?: number;
 	loopTo?: "on" | "off";
+	/** Pips animating from pipFrom lit to pipTo lit, since pipStart. */
+	pipFrom?: number;
+	pipTo?: number;
+	pipStart?: number;
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -265,6 +271,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.lastSteady = undefined;
 		inst.flipSince = undefined;
 		inst.loopSince = undefined;
+		inst.pipFrom = inst.pipTo = inst.pipStart = undefined;
 		streamDeck.logger.debug(`${this.describe(inst)}: configured (keys "${settings.keys ?? ""}", ${inst.steps.length} step(s))`);
 		const field = inst.settings.field;
 		if (field) {
@@ -361,7 +368,34 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				animating ||= t < 1;
 			}
 		}
-		// One frame timer drives the cog, the gear swing and the lights.
+		// Pips: the game doesn't report pip levels, so a share is lit while the system is on, none
+		// otherwise. When that changes they light (or go out) one at a time, as on SC Gauge.
+		const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
+		const pipsLit = phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0;
+		let pipLevels: number[] | undefined;
+		if (inst.hasPips) {
+			const now = Date.now();
+			if (inst.pipTo === undefined) inst.pipTo = pipsLit;
+			else if (pipsLit !== inst.pipTo) {
+				inst.pipFrom = inst.pipTo;
+				inst.pipTo = pipsLit;
+				inst.pipStart = now;
+			}
+			const pt = inst.pipStart === undefined ? 1 : (now - inst.pipStart) / PIP_ANIM_MS;
+			if (pt < 1 && inst.pipFrom !== undefined) {
+				const from = inst.pipFrom, to = inst.pipTo, m = Math.abs(to - from);
+				pipLevels = Array.from({ length: pipCount }, (_, i) => {
+					if (i >= Math.max(from, to)) return 0;
+					if (i < Math.min(from, to)) return 1;
+					// Each changing pip takes 40% of the time; they start in turn across the first 60%.
+					const k = to > from ? i - from : from - 1 - i;
+					const local = Math.max(0, Math.min(1, (pt - (k / Math.max(1, m)) * 0.6) / 0.4));
+					return to > from ? local : 1 - local;
+				});
+				animating = true;
+			} else inst.pipStart = undefined;
+		}
+		// One frame timer drives the cog, the gear swing, the lights and the pips.
 		if (phase === "busy" || animating) this.startCog(inst);
 		else this.stopCog(inst);
 		// Landing gear is drawn by pose: hanging down when deployed (ON), folded up when retracted
@@ -401,8 +435,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "busy" ? s.busyIconColor
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
-			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
-			const pips = inst.hasPips ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "ring" || s.pipLayout === "icon" ? s.pipLayout : ("row" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
+			const pips = inst.hasPips ? { count: pipCount, filled: pipsLit, levels: pipLevels, layout: s.pipLayout === "ring" || s.pipLayout === "icon" ? s.pipLayout : ("row" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, gaugeIcon: inst.gaugeIcon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}

@@ -29,14 +29,14 @@ export interface HotkeyFace {
 	/** Lights / doors: how far switched (0 = off / shut, 1 = on / open). Drawn instead of the static icon. */
 	switchAmount?: number;
 	/** Power icons: the pip ring around the symbol. */
-	pips?: { count: number; filled: number; layout?: PipLayout; /** Pip colour (default: the icon colour). */ color?: string };
+	pips?: { count: number; filled: number; layout?: PipLayout; /** Pip colour (default: the icon colour). */ color?: string; /** While animating: each pip's brightness, 0-1. */ levels?: number[] };
 }
 
 function gaugePipped(icon: GaugeIcon, fg: string, pips: NonNullable<HotkeyFace["pips"]>): string {
 	const pc = pips.color ?? fg;
 	const layout = pips.layout ?? "ring";
-	if (layout === "ring") return pipRing(pc, pips.count, pips.filled) + gaugeIconAt(icon, fg);
-	return (layout === "row" ? pipRow(pc, pips.count, pips.filled) : "") + gaugeIconInBoundary(icon, fg);
+	if (layout === "ring") return pipRing(pc, pips.count, pips.filled, pips.levels) + gaugeIconAt(icon, fg);
+	return (layout === "row" ? pipRow(pc, pips.count, pips.filled, pips.levels) : "") + gaugeIconInBoundary(icon, fg);
 }
 
 /**
@@ -72,7 +72,7 @@ export function renderHotkey(face: HotkeyFace): string {
 	const pipped = !face.pips ? null
 		// A power button with an icon chosen from the gauge list: the same pips around that icon.
 		: face.gaugeIcon ? gaugePipped(face.gaugeIcon, fg, face.pips)
-		: pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled, face.pips.layout, face.pips.color ?? fg);
+		: pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled, face.pips.layout, face.pips.color ?? fg, face.pips.levels);
 	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, X, Y, S, face.cogAngle ?? 0, face.color) : face.gaugeIcon ? gaugeIconInBoundary(face.gaugeIcon, fg) : iconSvg(face.icon, fg, X, Y, S));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +

@@ -214,14 +214,24 @@ export const PIP_ICON_FILES: Record<string, string> = {
 export type PipLayout = "ring" | "row" | "icon";
 
 /** `color` is the symbol; `pipColor` the pips (defaults to the symbol colour). */
-export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: PipLayout = "ring", pipColor = color): string | null {
+/**
+ * Opacity of pip i: lit (1) or unlit (0.28), or in between while it animates (`levels`, 0-1 per pip,
+ * as SC Gauge does when pips light or go out one at a time).
+ */
+function pipOpacity(i: number, filled: number, levels?: number[]): string {
+	const level = levels ? (levels[i] ?? 0) : i < filled ? 1 : 0;
+	const o = 0.28 + 0.72 * level;
+	return o >= 0.999 ? "" : ` opacity="${o.toFixed(2)}"`;
+}
+
+export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: PipLayout = "ring", pipColor = color, levels?: number[]): string | null {
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
 	const symbol = withoutBars(file, body);
-	if (layout !== "ring") return (layout === "row" ? pipRow(pipColor, count, filled) : "") + boundarySymbol(file, symbol, color);
+	if (layout !== "ring") return (layout === "row" ? pipRow(pipColor, count, filled, levels) : "") + boundarySymbol(file, symbol, color);
 	const { CX, CY, R, WIDTH } = RING;
-	const ring = pipRing(pipColor, count, filled);
+	const ring = pipRing(pipColor, count, filled, levels);
 
 	// The symbol keeps its size relative to the original bars, which circled the whole artwork:
 	// the artwork box maps onto the inside of the arc.
@@ -239,7 +249,7 @@ const RING = { CX: 72, CY: 66, R: 44, WIDTH: 9 };
  * 270° sweep starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear
  * space between pips (the arcs are shortened so the round caps don't eat into the gap).
  */
-export function pipRing(pipColor: string, count: number, filled: number): string {
+export function pipRing(pipColor: string, count: number, filled: number, levels?: number[]): string {
 	const { CX, CY, R, WIDTH } = RING;
 	const START = 225, SWEEP = 270, GAP = 9;
 	const CAP = ((WIDTH / 2) / R) * (180 / Math.PI); // how far a round cap reaches, in degrees
@@ -255,14 +265,13 @@ export function pipRing(pipColor: string, count: number, filled: number): string
 		const a0 = START + i * per + (i === 0 ? CAP : GAP / 2 + CAP);
 		const a1 = START + (i + 1) * per - (i === n - 1 ? CAP : GAP / 2 + CAP);
 		if (a1 <= a0) continue;
-		const lit = i < filled;
-		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${pipColor}" stroke-width="${WIDTH}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}/>`;
+		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${pipColor}" stroke-width="${WIDTH}" stroke-linecap="round"${pipOpacity(i, filled, levels)}/>`;
 	}
 	return ring;
 }
 
 /** Pip row across the top, like SC Gauge style 8 (render/gauge.ts v9): x 30-114, y 20, 7 px thick, 8 px gaps. */
-export function pipRow(color: string, count: number, filled: number): string {
+export function pipRow(color: string, count: number, filled: number, levels?: number[]): string {
 	const X0 = 30, X1 = 114, Y = 20, WIDTH = 7, GAP = 8;
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const per = (X1 - X0 + GAP) / n;
@@ -272,7 +281,7 @@ export function pipRow(color: string, count: number, filled: number): string {
 		const a = X0 + i * per + WIDTH / 2;
 		const b = X0 + (i + 1) * per - GAP - WIDTH / 2;
 		const d = b > a ? `M${a.toFixed(2)} ${Y}H${b.toFixed(2)}` : `M${a.toFixed(2)} ${Y}h0.01`;
-		row += `<path d="${d}" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${i < filled ? "" : ` opacity="0.28"`}/>`;
+		row += `<path d="${d}" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${pipOpacity(i, filled, levels)}/>`;
 	}
 	return row;
 }
