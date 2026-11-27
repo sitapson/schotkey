@@ -11,7 +11,7 @@
  *   v9  All-in-one: pip row on top, smaller fuel ring with the icon inside, % in the ring's gap.
  *   v10 All-in-one, side by side: pip row on top, icon left, large % right, fuel bar below.
  *   v11 All-in-one, dome: 180° fuel arc over the icon, % under the icon, pip row at the bottom.
- *   v12 Simple: large centred icon, straight fuel bar below. No pips or text.
+ *   v12 Like v9, stacked: pip row on top, icon centred, straight fuel bar, % below.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -305,11 +305,11 @@ export function renderGauge(face: GaugeFace): string {
 			break;
 		}
 		case "v12":
-			// Just the icon, large and centred, with a straight fuel bar below.
-			parts = fuelLine(22, 122, 118, 12, n, f, face.partial, fuelPaint);
-			iconScale = 1.2;
+			// Style 8's parts, stacked: pip row on top, full-size icon centred, straight fuel bar, % below.
+			parts = pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels) + fuelLine(24, 120, 101, 10, n, f, face.partial, fuelPaint);
 			iconDy = -4;
-			showText = false;
+			textY = 129;
+			textSize = face.valueText.length > 4 ? 15 : 19;
 			break;
 	}
 
