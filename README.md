@@ -8,10 +8,23 @@ Unofficial fan project. CIG hasn't said whether fan tools may use the telemetry 
 
 | Action | What it does |
 | --- | --- |
-| **SC Hotkey** | Sends a key combo (tap / hold / long press) as hardware scancodes. Its face shows ON / OFF / OFFLINE from a telemetry field you pick, with your labels, colours or images. Optional: only press if not already in the wanted state; warn (⚠) if the state didn't change after a press; print the live value. |
+| **SC Button** | One action for every Star Citizen key. Its settings start with a single **Button** dropdown; after you choose, only the settings that apply are shown. |
 | **Telemetry Status** | LIVE / CONNECTING / OFFLINE with messages per second. Press to save every current field to `com.sctelemetry.deck.sdPlugin/snapshots/`. |
 
-Key syntax: `LAlt+N`, `RCtrl+F13`, `Num5`, sequences `LCtrl+K, wait 200, K`. Modifiers: `LAlt RAlt LCtrl RCtrl LShift RShift` (`Alt`/`Ctrl`/`Shift` = left). F13–F24 are handy for Stream-Deck-only binds.
+What SC Button can be:
+
+| Choice | What the key does |
+| --- | --- |
+| **Hotkey** | An icon and a keybind. No state from the game. |
+| **Hotkey with status** | Landing gear, lights, doors, LAMP, VTOL, coupled, cruise, speed limiter, G-safe, gimbal lock, boost, or a custom field: sends the key and shows the system's state (animated for gear, lights, doors and LAMP). |
+| **Power** | Ship power, engines, shields, weapons, coolers, quantum drive, life support, gravity, sensors: on / off from the game, with pips (a ring or a row). The game doesn't report pip levels, so two-thirds are lit when on. |
+| **Gauge** | Engines (hydrogen fuel), quantum fuel, boost reserves, oxygen, health, or a custom field: a gauge in one of 18 styles, with pips. Press to send its key (e.g. engine power). |
+
+Each choice comes with a default keybind (Star Citizen's own default, where it has one), icon and colours: black background, white icon and pips, cyan gauge and % text, yellow warning, red critical. All can be changed.
+
+Keys are recorded: click **Key to press** and press the combination (e.g. hold Right Alt and press L to get `RAlt+L`). Left and right modifiers are kept apart. F13–F24 are handy for Stream-Deck-only binds.
+
+The older **SC Hotkey** and **SC Gauge** actions (before 0.3.0) still work on keys that use them, but are hidden from the actions list.
 
 ## Setup
 
@@ -88,7 +101,7 @@ npm run watch
 
 `streamdeck dev` turns on Stream Deck's developer mode. Without it, Stream Deck ignores the restart that `watch` sends after each rebuild. Stream Deck only finds a newly linked plugin when the app starts, so quit and reopen it once after linking.
 
-`watch` rebuilds and restarts the plugin on every save. Drag **SC Hotkey** from the *Star Citizen* category, set keys, and pick a field from the dropdown (game must be running; use the refresh button).
+`watch` rebuilds and restarts the plugin on every save. Drag **SC Button** from the *Star Citizen* category onto a key and choose what it is in the Button dropdown (the game must be running for live state).
 
 ## Layout
 
@@ -99,11 +112,15 @@ src/
   telemetry/reflection.ts gRPC server reflection -> protobufjs types
   telemetry/client.ts     shared feed connection, flatten to paths, subscribe, reconnect
   input/keyboard.ts       scancode SendInput via a persistent PowerShell helper
-  render/key-image.ts     generated SVG key faces
-  actions/                SC Hotkey, Telemetry Status
+  buttons.ts              SC Button's choices: kind, preset, default key and icon
+  presets.ts              telemetry fields behind each choice
+  render/                 SVG key faces: hotkeys, gauges, icons, the icon boundary
+  actions/sc-key.ts       SC Button: routes each key to the hotkey or gauge engine
+  actions/                sc-hotkey.ts, sc-gauge.ts (the engines), telemetry-status.ts
 dev/                      fake telemetry server + made-up proto for offline development
 com.sctelemetry.deck.sdPlugin/
-  manifest.json, ui/hotkey.html (settings panel), imgs/, telemetry.config.json
+  manifest.json, ui/key.html + key.js (SC Button settings), ui/key-recorder.js,
+  imgs/icons/ (supplied SVG icons + bounds.json), telemetry.config.json
 ```
 
 ## Versions

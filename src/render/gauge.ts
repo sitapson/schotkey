@@ -487,7 +487,7 @@ export function renderGauge(face: GaugeFace): string {
 			? ` transform="${fitToBoundary(box)}"`
 			: iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
 	// The value (a number or %) in the gauge colour; messages like ENG OFF or --% in white.
-	const isValue = /d/.test(face.valueText);
+	const isValue = /[0-9]/.test(face.valueText);
 	const textColor = isValue ? (user.text ?? normal) : (user.message ?? "#ffffff");
 	const text = showText
 		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${textColor}"${op(textOpacity)}>${esc(face.valueText)}</text>`

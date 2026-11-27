@@ -1,5 +1,16 @@
 ﻿# Changelog
 
+## 0.3.0 (in progress)
+
+- **One action, SC Button:** replaces SC Hotkey and SC Gauge in the actions list. Its settings show a single **Button** dropdown, then only what applies to the choice:
+  - **Hotkey:** an icon and a keybind, no game state.
+  - **Hotkey with status:** landing gear, lights, doors, LAMP, VTOL, coupled, cruise, speed limiter, G-safe, gimbal lock, boost, custom field.
+  - **Power:** ship power, engines, shields, weapons, coolers, quantum drive, and new: life support, gravity, sensors. All show pips.
+  - **Gauge:** engines (hydrogen), quantum, boost, oxygen, health, custom field.
+- **Default keybinds** for each choice, from Star Citizen 4.10.2's defaults (blank where the game has none: doors, speed limiter, G-safe, coolers, quantum drive, life support, gravity, sensors). Choosing a button fills in its key, which you can re-record.
+- **New default colours:** black backgrounds; white icons and pips; cyan gauge; cyan % text and white message text (ENG OFF, --%); yellow warning, red critical.
+- Older SC Hotkey / SC Gauge keys keep working (those actions are hidden from the list, not removed).
+
 ## 0.2.0 (27 Nov 2026)
 
 Tested against Star Citizen LIVE 4.10 (telemetry on 127.0.0.1:2942).
