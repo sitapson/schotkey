@@ -41,6 +41,46 @@
 				<option value="v16">15 · Big icon, pips, fuel bar, %</option>
 			</sdpi-select>
 		</sdpi-item>
+		<sdpi-item label="Icon">
+			<sdpi-select setting="icon" default="auto">
+				<option value="auto">From the gauge choice</option>
+				<optgroup label="Fuel and vitals">
+					<option value="hydrogen">Hydrogen</option>
+					<option value="hexagon">Hydrogen (hexagon)</option>
+					<option value="quantum">Quantum (atom)</option>
+					<option value="boost">Boost</option>
+					<option value="oxygen">Oxygen</option>
+					<option value="health">Health</option>
+				</optgroup>
+				<optgroup label="Power">
+					<option value="shippower">Ship power</option>
+					<option value="power-engines">Engines</option>
+					<option value="power-shields">Shields</option>
+					<option value="power-weapons">Weapons</option>
+					<option value="power-coolers">Coolers</option>
+					<option value="power-quantum">Quantum drive</option>
+					<option value="power-life-support">Life support</option>
+					<option value="power-gravity">Gravity</option>
+				</optgroup>
+				<optgroup label="Ship">
+					<option value="landing-gear">Landing gear</option>
+					<option value="headlights">Headlights</option>
+					<option value="doors">Doors</option>
+					<option value="vtol">VTOL</option>
+					<option value="coupled">Coupled</option>
+					<option value="config">Cycle configuration</option>
+					<option value="lamp">LAMP</option>
+				</optgroup>
+				<optgroup label="Other">
+					<option value="comms">Comms</option>
+					<option value="pip">Ship marker</option>
+					<option value="tobii">Head tracking</option>
+					<option value="tobii2">Head tracking (small)</option>
+					<option value="mirai">Mirai logo</option>
+					<option value="none">No icon</option>
+				</optgroup>
+			</sdpi-select>
+		</sdpi-item>
 		<sdpi-item label="Pips">
 			<sdpi-range setting="pips" min="1" max="12" step="1" default="4" showlabels></sdpi-range>
 		</sdpi-item>
@@ -94,16 +134,6 @@
 			<summary>Advanced: custom field and display</summary>
 			<sdpi-item label="Telemetry field">
 				<sdpi-select setting="field" datasource="getFields" hot-reload show-refresh placeholder="Only used with Custom"></sdpi-select>
-			</sdpi-item>
-			<sdpi-item label="Icon">
-				<sdpi-select setting="icon" placeholder="Only used with Custom">
-					<option value="hydrogen">Hydrogen</option>
-					<option value="quantum">Quantum</option>
-					<option value="boost">Boost</option>
-					<option value="oxygen">Oxygen</option>
-					<option value="health">Health</option>
-					<option value="none">None</option>
-				</sdpi-select>
 			</sdpi-item>
 			<sdpi-item label="Empty value">
 				<sdpi-textfield setting="min" placeholder="0"></sdpi-textfield>

@@ -9,8 +9,8 @@ import { execFileSync } from "node:child_process";
 
 const dir = "com.sctelemetry.deck.sdPlugin/imgs/icons";
 const files = readdirSync(dir).filter((f) => f.endsWith(".svg"));
-// Icons drawn with pips (src/render/user-icons.ts PIP_ICON_FILES).
-const SYMBOL_FILES = ["power.svg", "power-shields.svg"];
+// Power icons (power.svg, power-*.svg): their first four paths are corner bars the plugin can replace.
+const SYMBOL_FILES = readdirSync(dir).filter((f) => /^power(-[\w-]+)?\.svg$/.test(f));
 const browser = [
 	"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
 	"C:/Program Files/Microsoft/Edge/Application/msedge.exe",
@@ -30,12 +30,21 @@ for (const d of document.querySelectorAll("div[data-f]")) {
   svg.appendChild(g);
   const b = g.getBBox();
   out[d.dataset.f] = { x: +b.x.toFixed(2), y: +b.y.toFixed(2), w: +b.width.toFixed(2), h: +b.height.toFixed(2) };
-  // Power icons: their first four paths are the corner bars, which the plugin replaces with
-  // pips. Also record the symbol alone ("file#symbol") so it can fill the icon boundary.
+  // Power icons: four corner bars around a symbol. The plugin replaces the bars with pips (or
+  // drops them), so record which shapes they are and the symbol's own area ("file#symbol").
+  // The bars are the four shapes whose centres sit farthest from the icon's centre.
   if (${JSON.stringify(SYMBOL_FILES)}.includes(d.dataset.f)) {
-    [...g.querySelectorAll("path")].slice(0, 4).forEach((p) => p.remove());
+    const all = g.getBoundingClientRect();
+    const mid = [all.x + all.width / 2, all.y + all.height / 2];
+    const shapes = [...g.querySelectorAll("path,polygon,circle,ellipse,rect")].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { el, d: Math.hypot(r.x + r.width / 2 - mid[0], r.y + r.height / 2 - mid[1]) };
+    }).sort((a, b) => b.d - a.d);
+    const bars = shapes.slice(0, 4).map((s) => s.el);
+    const ids = bars.map((el) => el.id);
+    bars.forEach((el) => el.remove());
     const s = g.getBBox();
-    out[d.dataset.f + "#symbol"] = { x: +s.x.toFixed(2), y: +s.y.toFixed(2), w: +s.width.toFixed(2), h: +s.height.toFixed(2) };
+    out[d.dataset.f + "#symbol"] = { x: +s.x.toFixed(2), y: +s.y.toFixed(2), w: +s.width.toFixed(2), h: +s.height.toFixed(2), bars: ids };
   }
 }
 document.getElementById("out").textContent = "BOUNDS" + JSON.stringify(out) + "END";

@@ -55,7 +55,29 @@ function load(file: string): string | null {
 	return body;
 }
 
-let bounds: Record<string, Box> | null = null;
+/** bounds.json entries; power icons also have "file#symbol", with the ids of their corner bars. */
+let bounds: Record<string, Box & { bars?: string[] }> | null = null;
+
+/**
+ * A power icon without its four corner bars. The bars' ids come from bounds.json (found by
+ * position in scripts/measure-icons.mjs); without that, the first four paths are assumed.
+ */
+function withoutBars(file: string, body: string): string {
+	const ids = symbolEntry(file)?.bars;
+	if (ids?.length) return body.replace(/<(path|polygon|circle|ellipse|rect)\b[^>]*?\bid="([^"]+)"[^>]*?\/>/g, (m, _tag: string, id: string) => (ids.includes(id) ? "" : m));
+	let removed = 0;
+	return body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
+}
+
+function symbolEntry(file: string) {
+	boxOf(file); // loads bounds.json
+	return bounds?.[file + "#symbol"];
+}
+
+/** Drawn area of a power icon's symbol alone (the whole icon if not measured). */
+function symbolBox(file: string): Box {
+	return symbolEntry(file) ?? boxOf(file);
+}
 
 /** The artwork's drawn area on its page (from bounds.json, written by scripts/measure-icons.mjs). */
 function boxOf(file: string): Box {
@@ -196,8 +218,7 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
-	let removed = 0;
-	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
+	const symbol = withoutBars(file, body);
 	if (layout !== "ring") return (layout === "row" ? pipRow(pipColor, count, filled) : "") + boundarySymbol(file, symbol, color);
 
 	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
@@ -251,8 +272,7 @@ function pipRow(color: string, count: number, filled: number): string {
  * drawn area ("file#symbol" in bounds.json), not the file's, which still counts the bars.
  */
 function boundarySymbol(file: string, symbol: string, color: string): string {
-	const whole = boxOf(file); // also loads bounds.json
-	const box = bounds?.[file + "#symbol"] ?? whole;
+	const box = symbolBox(file);
 	return `<g transform="${fitToBoundary(box)}">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
@@ -291,18 +311,19 @@ export function userIconSvg(icon: string, color: string, cx: number, cy: number,
 }
 
 /** Where a supplied icon's artwork lands when drawn by fileIconSvg() with the same cx, cy and size. */
-export function fileIconBox(file: string, cx: number, cy: number, size: number): Box | null {
+export function fileIconBox(file: string, cx: number, cy: number, size: number, symbolOnly = false): Box | null {
 	if (!load(file)) return null;
-	const b = boxOf(file);
+	const b = symbolOnly ? symbolBox(file) : boxOf(file);
 	const s = size / Math.max(b.w, b.h);
 	return { x: cx - (b.w * s) / 2, y: cy - (b.h * s) / 2, w: b.w * s, h: b.h * s };
 }
 
 /** A supplied icon file (imgs/icons/<file>), its artwork centred at (cx, cy) and fitted to a size×size box. */
-export function fileIconSvg(file: string, color: string, cx: number, cy: number, size: number): string | null {
-	const body = load(file);
-	if (!body) return null;
-	const b = boxOf(file);
+export function fileIconSvg(file: string, color: string, cx: number, cy: number, size: number, symbolOnly = false): string | null {
+	const loaded = load(file);
+	if (!loaded) return null;
+	const body = symbolOnly ? withoutBars(file, loaded) : loaded;
+	const b = symbolOnly ? symbolBox(file) : boxOf(file);
 	const s = size / Math.max(b.w, b.h);
 	const tx = cx - (b.x + b.w / 2) * s;
 	const ty = cy - (b.y + b.h / 2) * s;

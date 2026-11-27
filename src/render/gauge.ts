@@ -29,7 +29,44 @@
 import { Box, fitToBoundary } from "./boundary";
 import { fileIconBox, fileIconSvg } from "./user-icons";
 
-export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
+/**
+ * Icons a gauge can show, with the names the settings panel uses. Drawn ones are line icons
+ * built in here; supplied ones are SVGs in imgs/icons ("symbol": power icons drawn without
+ * their four corner bars, which would clash with the gauge).
+ */
+export const GAUGE_ICONS = {
+	// Drawn
+	hexagon: { name: "Hydrogen (hexagon)" },
+	quantum: { name: "Quantum (atom)" },
+	boost: { name: "Boost" },
+	oxygen: { name: "Oxygen" },
+	health: { name: "Health" },
+	// Supplied
+	hydrogen: { name: "Hydrogen", file: "hydrogen.svg" },
+	shippower: { name: "Ship power", file: "power.svg", symbol: true },
+	"power-engines": { name: "Engines", file: "power-engines.svg", symbol: true },
+	"power-shields": { name: "Shields", file: "power-shields.svg", symbol: true },
+	"power-weapons": { name: "Weapons", file: "power-weapons.svg", symbol: true },
+	"power-coolers": { name: "Coolers", file: "power-coolers.svg", symbol: true },
+	"power-quantum": { name: "Quantum drive", file: "power-quantum.svg", symbol: true },
+	"power-life-support": { name: "Life support", file: "power-life-support.svg", symbol: true },
+	"power-gravity": { name: "Gravity", file: "power-gravity.svg", symbol: true },
+	"landing-gear": { name: "Landing gear", file: "landing-gear.svg" },
+	headlights: { name: "Headlights", file: "headlights.svg" },
+	doors: { name: "Doors", file: "doors.svg" },
+	vtol: { name: "VTOL", file: "vtol.svg" },
+	coupled: { name: "Coupled", file: "coupled.svg" },
+	config: { name: "Cycle configuration", file: "config.svg" },
+	lamp: { name: "LAMP", file: "lamp.svg" },
+	comms: { name: "Comms", file: "comms.svg" },
+	pip: { name: "Ship marker", file: "pip.svg" },
+	tobii: { name: "Head tracking", file: "tobii.svg" },
+	tobii2: { name: "Head tracking (small)", file: "tobii2.svg" },
+	mirai: { name: "Mirai logo", file: "mirai.svg" },
+} as const satisfies Record<string, { name: string; file?: string; symbol?: boolean }>;
+
+export type GaugeIcon = keyof typeof GAUGE_ICONS | "none";
+export const isGaugeIcon = (v: unknown): v is GaugeIcon => v === "none" || (typeof v === "string" && Object.hasOwn(GAUGE_ICONS, v));
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
 export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12" | "v13" | "v14" | "v15" | "v16";
 export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16"];
@@ -40,7 +77,7 @@ export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "
  * Measured in a browser; quantum's height worked out from its rotated ellipses.
  */
 const GAUGE_ICON_BOX: Partial<Record<GaugeIcon, Box>> = {
-	hydrogen: { x: 52.2, y: 43.4, w: 39.6, h: 45.2 },
+	hexagon: { x: 52.2, y: 43.4, w: 39.6, h: 45.2 },
 	quantum: { x: 48.4, y: 44.9, w: 47.2, h: 42.2 },
 	boost: { x: 56.4, y: 52.4, w: 37.2, h: 27.2 },
 	oxygen: { x: 54.4, y: 51.4, w: 35.2, h: 32.2 },
@@ -199,29 +236,40 @@ function pipLine(x0: number, x1: number, y: number, width: number, count: number
 	return out;
 }
 
-// Simple line icons, drawn around (72, 66).
-/** The supplied hydrogen icon, drawn where the hexagon was: centred at (72, 66), 45.2 px tall at most. */
-const HYDROGEN_FILE = "hydrogen.svg";
-const HYDROGEN_AT = { cx: 72, cy: 66, size: 45.2 };
+/** Supplied icons are drawn where the line icons are: centred at (72, 66), 45.2 px at most. */
+const SUPPLIED_AT = { cx: 72, cy: 66, size: 45.2 };
+
+const suppliedOf = (kind: GaugeIcon) => {
+	const def = kind === "none" ? undefined : (GAUGE_ICONS[kind] as { file?: string; symbol?: boolean });
+	return def?.file ? { file: def.file, symbol: !!def.symbol } : undefined;
+};
 
 /** Drawn extent of a gauge icon, for fitting it into the icon boundary. */
 function iconBox(kind: GaugeIcon): Box | undefined {
-	if (kind === "hydrogen") {
-		const b = fileIconBox(HYDROGEN_FILE, HYDROGEN_AT.cx, HYDROGEN_AT.cy, HYDROGEN_AT.size);
+	const sup = suppliedOf(kind);
+	if (sup) {
+		const b = fileIconBox(sup.file, SUPPLIED_AT.cx, SUPPLIED_AT.cy, SUPPLIED_AT.size, sup.symbol);
 		if (b) return b;
+		if (kind === "hydrogen") return GAUGE_ICON_BOX.hexagon;
 	}
 	return GAUGE_ICON_BOX[kind];
 }
 
+// Line icons drawn around (72, 66); supplied icons from imgs/icons in the same place.
 function icon(kind: GaugeIcon, color: string): string {
 	// One stroke-width per element: a repeated attribute makes the SVG invalid and the key blank.
 	const line = (w: number) => `fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
 	const s = line(3.2);
+	const sup = suppliedOf(kind);
+	if (sup) {
+		const svg = fileIconSvg(sup.file, color, SUPPLIED_AT.cx, SUPPLIED_AT.cy, SUPPLIED_AT.size, sup.symbol);
+		if (svg) return svg;
+		// Hydrogen falls back to the drawn hexagon if its file is missing; others show nothing.
+		if (kind !== "hydrogen") return "";
+		kind = "hexagon";
+	}
 	switch (kind) {
-		case "hydrogen": {
-			// The supplied hydrogen.svg, sized like the original hexagon; the hexagon if it's missing.
-			const supplied = fileIconSvg(HYDROGEN_FILE, color, HYDROGEN_AT.cx, HYDROGEN_AT.cy, HYDROGEN_AT.size);
-			if (supplied) return supplied;
+		case "hexagon": {
 			const hex = [0, 60, 120, 180, 240, 300]
 				.map((a) => {
 					const t = ((a - 90) * Math.PI) / 180;

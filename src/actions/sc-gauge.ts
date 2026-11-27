@@ -22,7 +22,7 @@ import type { JsonValue } from "@elgato/utils";
 import { Keyboard, parseKeys, Step } from "../input/keyboard";
 import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
-import { GAUGE_STYLES, GaugeColors, GaugeIcon, GaugeStyle, renderGauge } from "../render/gauge";
+import { GAUGE_STYLES, GaugeColors, GaugeIcon, GaugeStyle, isGaugeIcon, renderGauge } from "../render/gauge";
 import { isOn } from "./on-off";
 import { offlineOpacityOf, PENDING_MS, pulseAt } from "./sc-hotkey";
 import { GAUGE_PRESETS } from "../presets";
@@ -31,7 +31,8 @@ type GaugeSettings = {
 	/** Plain-English choice: "hydrogen", "quantum"… (see presets.ts) or "custom". */
 	preset?: string;
 	field?: string;
-	icon?: GaugeIcon;
+	/** Icon choice; "auto" (or unset) = the gauge's own default. */
+	icon?: string;
 	min?: number | string;
 	max?: number | string;
 	/** "percent" shows 0–100%; "value" shows the raw value with `unit`. */
@@ -109,13 +110,14 @@ interface Resolved {
  */
 function resolve(s: GaugeSettings): Resolved {
 	const preset = s.preset && s.preset !== "custom" ? GAUGE_PRESETS[s.preset] : undefined;
+	const chosenIcon = isGaugeIcon(s.icon) ? s.icon : undefined;
 	if (preset) {
 		return {
 			field: preset.field,
 			maxField: preset.maxField,
 			min: preset.min ?? 0,
 			max: preset.max ?? 1,
-			icon: preset.icon,
+			icon: chosenIcon ?? preset.icon,
 			stateField: preset.stateField,
 			stateOnValues: preset.stateOnValues,
 			offLabel: s.offLabel || preset.offLabel || DEFAULTS.offLabel,
@@ -130,7 +132,7 @@ function resolve(s: GaugeSettings): Resolved {
 		maxField: match?.maxField,
 		min: num(s.min, match?.min ?? DEFAULTS.min),
 		max: num(s.max, match?.max ?? DEFAULTS.max),
-		icon: s.icon ?? match?.icon ?? "none",
+		icon: chosenIcon ?? match?.icon ?? "none",
 		stateField: (s.stateField === undefined ? match?.stateField : s.stateField) || undefined,
 		stateOnValues: s.stateField === undefined ? match?.stateOnValues : s.stateOnValues,
 		offLabel: s.offLabel || match?.offLabel || DEFAULTS.offLabel,
