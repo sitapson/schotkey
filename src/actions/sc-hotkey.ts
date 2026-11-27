@@ -197,7 +197,10 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		if (pressMode === "hold") return this.keyboard.press(inst.steps);
 		this.keyboard.tap(inst.steps, pressMode === "long" ? (inst.settings.longMs ?? 1000) : (inst.settings.holdMs ?? 40));
 		// Gear, lights and LAMP replay their animation until the game reports the new state.
-		if (LOOP_ICONS.includes(inst.icon) && before !== "offline") {
+		// A plain hotkey (no field) gets no confirmation from the game, so nothing to wait for.
+		if (!inst.settings.field) {
+			// no repeat or pulse
+		} else if (LOOP_ICONS.includes(inst.icon) && before !== "offline") {
 			inst.loopTo = effective === "on" ? "off" : "on";
 			inst.loopSince = Date.now();
 			this.render(inst);
@@ -341,7 +344,9 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		if (inst.pendingSince !== undefined && (phase !== "off" || Date.now() - inst.pendingSince > PENDING_MS)) inst.pendingSince = undefined;
 		const pulse = inst.pendingSince !== undefined ? pulseAt(inst.pendingSince) : undefined;
 		if (pulse !== undefined) animating = true;
-		if (SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
+		// A plain hotkey (no field) has no state: its icon is drawn as-is, not in an ON / OFF pose.
+		const hasState = !!s.field;
+		if (hasState && SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
 			const ms = SWITCH_MS[inst.icon] ?? 1000;
 			if (inst.loopSince !== undefined) {
 				const eased = ease(loopT(inst.loopSince, ms));
@@ -359,7 +364,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		// (OFF), and swinging between the two while moving (eased like an actuator, repeating until
 		// the game reports it finished). After a press it starts swinging before DEPLOYING arrives.
 		let gearAngle: number | undefined;
-		if (inst.icon === "gear") {
+		if (hasState && inst.icon === "gear") {
 			const swing = (since: number, down: boolean) => {
 				const eased = ease(loopT(since, GEAR_SWING_MS));
 				return GEAR_UP_ANGLE * (down ? 1 - eased : eased);
