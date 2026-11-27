@@ -56,6 +56,8 @@ export interface GaugeColors {
 	pips?: string;
 	/** Fixed icon colour. Unset = the icon follows the gauge colour (normal / low / critical). */
 	icon?: string;
+	/** Value text colour. Unset = light grey-white. */
+	text?: string;
 }
 
 export const DEFAULT_GAUGE_COLORS = { background: "#13202a", normal: "#3fd0c9", warn: "#f2c230", alert: "#ff4f4f" };
@@ -313,7 +315,7 @@ export function renderGauge(face: GaugeFace): string {
 	const iconTransform =
 		iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
 	const text = showText
-		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
+		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${user.text ?? COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
 
 	// A chosen background fills the whole key (outer frame and panel) so it reads as one colour.

@@ -57,6 +57,7 @@ type GaugeSettings = {
 	iconColor?: string;
 	/** Pip colour (unset = the gauge's normal colour). */
 	pipColor?: string;
+	textColor?: string;
 	/** Strength of faded parts, percent (default 20): offline, unlit pips, empty fuel, system off. */
 	offlineOpacity?: number | string;
 	/** Look: v1 classic ring, v2 split pips/fuel, v3 fuel ring with inner pips. */
@@ -74,6 +75,7 @@ function colorsOf(s: GaugeSettings): GaugeColors {
 		warn: hex(s.warnColor),
 		alert: hex(s.alertColor),
 		pips: hex(s.pipColor),
+		text: hex(s.textColor),
 		icon: s.iconFollows === false ? hex(s.iconColor) : undefined,
 	};
 }
