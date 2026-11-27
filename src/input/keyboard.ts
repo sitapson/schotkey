@@ -22,6 +22,8 @@ const SCANCODES: Record<string, [number, boolean?]> = {
 	SEMICOLON: [0x27], APOSTROPHE: [0x28], GRAVE: [0x29], LSHIFT: [0x2a], BACKSLASH: [0x2b],
 	Z: [0x2c], X: [0x2d], C: [0x2e], V: [0x2f], B: [0x30], N: [0x31], M: [0x32],
 	COMMA: [0x33], PERIOD: [0x34], SLASH: [0x35], RSHIFT: [0x36], NUMMULTIPLY: [0x37], LALT: [0x38], SPACE: [0x39], CAPSLOCK: [0x3a],
+	// The extra key between Left Shift and Z on UK / ISO keyboards (\ |).
+	OEM102: [0x56],
 	F1: [0x3b], F2: [0x3c], F3: [0x3d], F4: [0x3e], F5: [0x3f], F6: [0x40], F7: [0x41], F8: [0x42], F9: [0x43], F10: [0x44],
 	NUMLOCK: [0x45], SCROLLLOCK: [0x46],
 	NUM7: [0x47], NUM8: [0x48], NUM9: [0x49], NUMMINUS: [0x4a], NUM4: [0x4b], NUM5: [0x4c], NUM6: [0x4d], NUMPLUS: [0x4e],
@@ -43,7 +45,7 @@ const ALIASES: Record<string, string> = {
 	LEFTSHIFT: "LSHIFT", RIGHTSHIFT: "RSHIFT", SHIFTLEFT: "LSHIFT", SHIFTRIGHT: "RSHIFT",
 	LEFTWIN: "LWIN", RIGHTWIN: "RWIN",
 	RETURN: "ENTER", DEL: "DELETE", INS: "INSERT", PGUP: "PAGEUP", PGDN: "PAGEDOWN", ESCAPE: "ESC",
-	SPACEBAR: "SPACE", CAPS: "CAPSLOCK", BKSP: "BACKSPACE",
+	SPACEBAR: "SPACE", CAPS: "CAPSLOCK", BKSP: "BACKSPACE", INTLBACKSLASH: "OEM102",
 };
 
 /** A sequence of combos, e.g. "LAlt+N" or "LCtrl+F13, wait 200, N". */

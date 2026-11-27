@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+		<script src="key-recorder.js"></script>
 		<style>
 			details { margin: 12px 0 4px; }
 			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
@@ -41,7 +42,7 @@
 			</sdpi-select>
 		</sdpi-item>
 		<sdpi-item label="Key to press">
-			<sdpi-textfield setting="keys" placeholder="e.g. N, RAlt+D, LCtrl+Shift+F13" title="Keys joined with +. Modifiers: LAlt / RAlt (AltGr), LCtrl / RCtrl, LShift / RShift, LWin. Plain Alt, Ctrl, Shift mean the left one. Sequence: LCtrl+K, wait 200, K"></sdpi-textfield>
+			<key-recorder setting="keys"></key-recorder>
 		</sdpi-item>
 		<sdpi-item label="Press">
 			<sdpi-select setting="pressMode" default="tap">
