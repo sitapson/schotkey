@@ -220,11 +220,28 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	if (!body) return null;
 	const symbol = withoutBars(file, body);
 	if (layout !== "ring") return (layout === "row" ? pipRow(pipColor, count, filled) : "") + boundarySymbol(file, symbol, color);
+	const { CX, CY, R, WIDTH } = RING;
+	const ring = pipRing(pipColor, count, filled);
 
-	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
-	// starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear space
-	// between pips (the arcs are shortened so the round caps don't eat into the gap).
-	const CX = 72, CY = 66, R = 44, WIDTH = 9, START = 225, SWEEP = 270, GAP = 9;
+	// The symbol keeps its size relative to the original bars, which circled the whole artwork:
+	// the artwork box maps onto the inside of the arc.
+	const b = boxOf(file);
+	const s = (2 * R - WIDTH) / Math.max(b.w, b.h);
+	const tx = CX - (b.x + b.w / 2) * s;
+	const ty = CY - (b.y + b.h / 2) * s;
+	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
+}
+
+const RING = { CX: 72, CY: 66, R: 44, WIDTH: 9 };
+
+/**
+ * The pip ring: the same arc as SC Gauge (render/gauge.ts), centre (72, 66), radius 44, 9 px wide,
+ * 270° sweep starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear
+ * space between pips (the arcs are shortened so the round caps don't eat into the gap).
+ */
+export function pipRing(pipColor: string, count: number, filled: number): string {
+	const { CX, CY, R, WIDTH } = RING;
+	const START = 225, SWEEP = 270, GAP = 9;
 	const CAP = ((WIDTH / 2) / R) * (180 / Math.PI); // how far a round cap reaches, in degrees
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const per = SWEEP / n;
@@ -241,18 +258,11 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 		const lit = i < filled;
 		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${pipColor}" stroke-width="${WIDTH}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}/>`;
 	}
-
-	// The symbol keeps its size relative to the original bars, which circled the whole artwork:
-	// the artwork box maps onto the inside of the arc.
-	const b = boxOf(file);
-	const s = (2 * R - WIDTH) / Math.max(b.w, b.h);
-	const tx = CX - (b.x + b.w / 2) * s;
-	const ty = CY - (b.y + b.h / 2) * s;
-	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
+	return ring;
 }
 
 /** Pip row across the top, like SC Gauge style 8 (render/gauge.ts v9): x 30-114, y 20, 7 px thick, 8 px gaps. */
-function pipRow(color: string, count: number, filled: number): string {
+export function pipRow(color: string, count: number, filled: number): string {
 	const X0 = 30, X1 = 114, Y = 20, WIDTH = 7, GAP = 8;
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const per = (X1 - X0 + GAP) / n;

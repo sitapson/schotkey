@@ -258,6 +258,11 @@ function iconBox(kind: GaugeIcon): Box | undefined {
 	return GAUGE_ICON_BOX[kind];
 }
 
+/** A gauge icon where gauges draw it: centred at (72, 66), about 45 px (SC Hotkey's pip ring layout). */
+export function gaugeIconAt(kind: GaugeIcon, color: string): string {
+	return icon(kind, color);
+}
+
 /** A gauge icon on its own, filling the icon boundary (used by SC Hotkey keys). */
 export function gaugeIconInBoundary(kind: GaugeIcon, color: string): string {
 	const box = iconBox(kind);

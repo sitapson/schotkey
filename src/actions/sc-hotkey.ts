@@ -123,6 +123,8 @@ interface Instance {
 	icon: HotkeyIcon;
 	/** Chosen from the gauge icon list: drawn still, so `icon` is left as a plain "power" (no animation or pips). */
 	gaugeIcon?: GaugeIcon;
+	/** Power buttons (ship power, shields) draw pips, whichever icon is chosen. */
+	hasPips: boolean;
 	cogAngle: number;
 	cogTimer?: NodeJS.Timeout;
 	/** Title last set by the plugin; undefined = the user's own title. */
@@ -154,7 +156,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 
 	override onWillAppear(ev: WillAppearEvent<HotkeySettings>): void {
 		if (!ev.action.isKey()) return;
-		const inst: Instance = { action: ev.action, settings: {}, steps: [], pressSeq: 0, changedSincePress: false, icon: "power", cogAngle: 0 };
+		const inst: Instance = { action: ev.action, settings: {}, steps: [], pressSeq: 0, changedSincePress: false, icon: "power", hasPips: false, cogAngle: 0 };
 		this.instances.set(ev.action.id, inst);
 		this.configure(inst, ev.payload.settings);
 	}
@@ -241,6 +243,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const gaugeIcon = settings.icon?.startsWith("g:") ? settings.icon.slice(2) : undefined;
 		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : undefined;
 		inst.icon = inst.gaugeIcon ? "power" : settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon as HotkeyIcon) ? (settings.icon as HotkeyIcon) : (preset?.icon ?? "power");
+		inst.hasPips = PIP_ICONS.includes(inst.icon) || (!!inst.gaugeIcon && !!preset && PIP_ICONS.includes(preset.icon));
 		this.stopCog(inst);
 		try {
 			inst.steps = settings.keys ? parseKeys(settings.keys) : [];
@@ -387,7 +390,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
-			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
+			const pips = inst.hasPips ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, gaugeIcon: inst.gaugeIcon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
