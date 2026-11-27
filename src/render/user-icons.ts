@@ -287,6 +287,36 @@ function boundarySymbol(file: string, symbol: string, color: string): string {
 }
 
 /**
+ * Your coupled.svg (a "target" ring with an arrow up out of it) with the arrow sliding in and out:
+ * `arrowOut` 1 = the arrow in its place (decoupled), 0 = hidden inside the target (coupled). The
+ * arrow is clipped below its own base line, so it rises out of the target through the gap at the
+ * top of the ring. The ring and dot never move; the icon is sized by the whole drawing (arrow
+ * included) so the target stays put. Shape ids and coordinates are from coupled.svg.
+ */
+const COUPLED_FILE = "coupled.svg";
+const COUPLED_ARROW = "polygon780-1";
+const COUPLED_ARROW_TIP = 7290.33; // in the arrow's own coordinates
+const COUPLED_ARROW_BASE = 7318.74;
+
+export function animatedCoupledSvg(color: string, cx: number, cy: number, size: number, arrowOut: number): string | null {
+	const body = load(COUPLED_FILE);
+	if (!body) return null;
+	const b = boxOf(COUPLED_FILE);
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
+	const out = Math.max(0, Math.min(1, arrowOut));
+	// Fully in: the tip sits on the base line, so the whole arrow is below the clip.
+	const dy = ((1 - out) * (COUPLED_ARROW_BASE - COUPLED_ARROW_TIP)).toFixed(2);
+	const clip =
+		`<clipPath id="coupled-arrow"><rect x="9500" y="${COUPLED_ARROW_TIP - 50}" width="300" height="${COUPLED_ARROW_BASE - COUPLED_ARROW_TIP + 50}"/></clipPath>`;
+	const art = body.replace(new RegExp(`<polygon\\b[^>]*\\bid="${COUPLED_ARROW}"[^>]*/>`), (arrow) =>
+		out <= 0.001 ? "" : `${clip}<g clip-path="url(#coupled-arrow)"><g transform="translate(0 ${dy})">${arrow}</g></g>`,
+	);
+	return `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${art.replaceAll("__ICON_COLOR__", color)}</g>`;
+}
+
+/**
  * Your lamp.svg ("L A M P") with each letter's brightness set separately, so the letters can light
  * up one after another, L, A, M, P, and go out in reverse. `amount`: 0 = off (all letters faint),
  * 1 = on (all letters full). The letter paths are found by their ids in that file.

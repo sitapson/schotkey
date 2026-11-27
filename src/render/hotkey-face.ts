@@ -5,7 +5,7 @@
 import { fitToBoundary, ICON_BOUNDARY } from "./boundary";
 import { GaugeIcon, gaugeIconAt, gaugeIconInBoundary } from "./gauge";
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
-import { animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, PipLayout, pipIconSvg, pipRing, pipRow } from "./user-icons";
+import { animatedCoupledSvg, animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, PipLayout, pipIconSvg, pipRing, pipRow } from "./user-icons";
 
 export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 
@@ -66,6 +66,8 @@ export function renderHotkey(face: HotkeyFace): string {
 		: face.icon === "lights" ? animatedLightsSvg(fg, X, Y, S, a)
 		: face.icon === "doors" ? withinBoundary(animatedDoorsSvg(fg, X, Y, S, a), MOTION_BOX.doors)
 		: face.icon === "lamp" ? animatedLampSvg(fg, X, Y, S, a)
+		// Coupled is ON: the arrow (decoupled) shows when OFF, so it comes out as the key switches off.
+		: face.icon === "coupled" ? animatedCoupledSvg(fg, X, Y, S, 1 - a)
 		: null;
 	const pipped = !face.pips ? null
 		// A power button with an icon chosen from the gauge list: the same pips around that icon.

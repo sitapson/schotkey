@@ -83,13 +83,13 @@ const COG_STEP = 5;
 const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
 /** How long the switch animation runs: doors swing slowly, lights and LAMP snap on and off. */
-const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 200, lamp: 200 };
+const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 200, lamp: 200, coupled: 300 };
 /** Icons whose animation repeats after a press until the game confirms the new state. */
-const LOOP_ICONS: HotkeyIcon[] = ["gear", "lights", "lamp"];
+const LOOP_ICONS: HotkeyIcon[] = ["gear", "lights", "lamp", "coupled"];
 /** Pause on the end pose between repeats, so a short animation reads as a repeat, not a flicker. */
 const LOOP_HOLD_MS = 250;
 /** Icons that animate between their OFF and ON pose when the state flips. */
-const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp"];
+const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp", "coupled"];
 /** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
 const PIP_ICONS: HotkeyIcon[] = ["shippower", "shields"];
 const PIPS_LIT_WHEN_ON = 0.66;
