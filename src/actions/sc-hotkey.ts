@@ -55,6 +55,8 @@ type HotkeySettings = {
 	offlineColor?: string;
 	/** Power icons: how many pips in the ring (1-12). */
 	pips?: number | string;
+	/** Power icons: pips as a ring around the symbol (default) or a row across the top (like gauge style 8). */
+	pipLayout?: "ring" | "row";
 	/** Icon colour in each state. */
 	onIconColor?: string;
 	offIconColor?: string;
@@ -376,7 +378,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
-			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0 } : undefined;
+			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" ? "row" as const : "ring" as const } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}

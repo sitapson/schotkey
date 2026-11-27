@@ -194,12 +194,13 @@ export const PIP_ICON_FILES: Record<string, string> = {
 	shields: "power-shields.svg",
 };
 
-export function pipIconSvg(icon: string, color: string, count: number, filled: number): string | null {
+export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: "ring" | "row" = "ring"): string | null {
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
 	let removed = 0;
 	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
+	if (layout === "row") return pipRowSvg(file, symbol, color, count, filled);
 
 	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
 	// starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear space
@@ -229,6 +230,32 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	const tx = CX - (b.x + b.w / 2) * s;
 	const ty = CY - (b.y + b.h / 2) * s;
 	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
+}
+
+/**
+ * The "row" pip layout, matching SC Gauge style 8 (render/gauge.ts v9): a straight row of rounded
+ * pips across the top (x 30-114, y 20, 7 px thick, 8 px gaps) and the symbol at that style's icon
+ * size and place, centred at (72, 82), about 46 px tall. The file's box still includes the room
+ * the original corner bars took, and the symbol is about 60% of it, so the box is scaled to 78 px.
+ */
+function pipRowSvg(file: string, symbol: string, color: string, count: number, filled: number): string {
+	const X0 = 30, X1 = 114, Y = 20, WIDTH = 7, GAP = 8;
+	const n = Math.max(1, Math.min(12, Math.round(count)));
+	const per = (X1 - X0 + GAP) / n;
+	let row = "";
+	for (let i = 0; i < n; i++) {
+		// Round caps reach WIDTH/2 past each end, so draw the line that much shorter.
+		const a = X0 + i * per + WIDTH / 2;
+		const b = X0 + (i + 1) * per - GAP - WIDTH / 2;
+		const d = b > a ? `M${a.toFixed(2)} ${Y}H${b.toFixed(2)}` : `M${a.toFixed(2)} ${Y}h0.01`;
+		row += `<path d="${d}" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${i < filled ? "" : ` opacity="0.28"`}/>`;
+	}
+	const CX = 72, CY = 82, SIZE = 78;
+	const bx = boxOf(file);
+	const s = SIZE / Math.max(bx.w, bx.h);
+	const tx = CX - (bx.x + bx.w / 2) * s;
+	const ty = CY - (bx.y + bx.h / 2) * s;
+	return row + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
 /**
