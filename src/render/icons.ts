@@ -66,13 +66,45 @@ const PATHS: Record<HotkeyIcon, string> = {
 	shippower: `<circle cx="24" cy="24" r="20"/><path d="M27 8L16 26h8l-3 14 11-18h-8z"/>`,
 };
 
-/** An icon centred at (cx, cy), `size` px across, in `color`. A supplied SVG icon wins over the built-in one. */
+/**
+ * Drawn extent of each line icon in its 48-unit grid (stroke included), so it can be fitted by
+ * what it draws rather than by the grid. Measured in a browser; quantum's height worked out
+ * from its rotated ellipses.
+ */
+const LINE_BOX: Record<HotkeyIcon, { x: number; y: number; w: number; h: number }> = {
+	gear: { x: 13.4, y: 1.4, w: 22.2, h: 43.2 },
+	lights: { x: 4.4, y: 9.4, w: 40.2, h: 29.2 },
+	doors: { x: 4.4, y: 4.4, w: 39.2, h: 39.2 },
+	vtol: { x: 10.4, y: 4.4, w: 27.2, h: 38.2 },
+	boost: { x: 5.4, y: 10.4, w: 37.2, h: 27.2 },
+	engines: { x: 2.4, y: 10.4, w: 42.2, h: 27.2 },
+	shields: { x: 6.4, y: 2.4, w: 35.2, h: 43.2 },
+	weapons: { x: 1.4, y: 1.4, w: 45.2, h: 45.2 },
+	coolers: { x: 5.1, y: 2.4, w: 37.8, h: 43.2 },
+	quantum: { x: 2.4, y: 4.7, w: 43.2, h: 38.6 },
+	coupled: { x: 1.4, y: 13.4, w: 45.2, h: 21.2 },
+	cruise: { x: 5.4, y: 15.4, w: 37.2, h: 26.2 },
+	limiter: { x: 5.4, y: 10.4, w: 37.2, h: 27.7 },
+	gsafe: { x: 2.4, y: 2.4, w: 43.2, h: 43.2 },
+	gimbals: { x: 4.4, y: 4.4, w: 39.2, h: 39.2 },
+	lamp: { x: 2.4, y: 10.4, w: 43.2, h: 27.2 },
+	shippower: { x: 2.4, y: 2.4, w: 43.2, h: 43.2 },
+	power: { x: 6.4, y: 2.4, w: 35.2, h: 37.7 },
+};
+
+/**
+ * An icon in `color`, its drawn area centred at (cx, cy) and fitted to a `size`×`size` box without
+ * distortion. A supplied SVG icon wins over the built-in one.
+ */
 export function iconSvg(icon: HotkeyIcon, color: string, cx: number, cy: number, size: number): string {
 	const supplied = userIconSvg(icon, color, cx, cy, size);
 	if (supplied) return supplied;
-	const s = size / 48;
+	const b = LINE_BOX[icon] ?? { x: 0, y: 0, w: 48, h: 48 };
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
 	return (
-		`<g transform="translate(${cx - 24 * s} ${cy - 24 * s}) scale(${s})" fill="none" stroke="${color}" color="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">` +
+		`<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})" fill="none" stroke="${color}" color="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">` +
 		(PATHS[icon] ?? PATHS.power) +
 		`</g>`
 	);
