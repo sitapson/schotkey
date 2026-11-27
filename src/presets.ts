@@ -62,7 +62,10 @@ export interface HotkeyPreset {
 	onValues?: string;
 	onLabel: string;
 	offLabel: string;
+	/** Behaviour icon: animations and pips follow it. */
 	icon: HotkeyIcon;
+	/** Icon from the gauge list drawn by default instead (pips still follow `icon`). */
+	defaultIcon?: GaugeIcon;
 }
 
 export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
@@ -72,7 +75,7 @@ export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
 	lights: { field: "vehicle.state.lights_enabled", onLabel: "LIGHTS ON", offLabel: "LIGHTS OFF", icon: "lights" },
 	vtol: { field: "vehicle.state.flight.state.vtol", onValues: "DEPLOYED", onLabel: "VTOL ON", offLabel: "VTOL OFF", icon: "vtol" },
 	// Whole-ship power: the power plant running. Ship power off shuts it down.
-	shippower: { field: "vehicle.state.power.powerplants", onLabel: "POWER ON", offLabel: "POWER OFF", icon: "shippower" },
+	shippower: { field: "vehicle.state.power.powerplants", onLabel: "POWER ON", offLabel: "POWER OFF", icon: "shippower", defaultIcon: "power-plant-01" },
 	engines: { field: "vehicle.state.power.engines", onLabel: "ENGINES ON", offLabel: "ENGINES OFF", icon: "engines" },
 	shields: { field: "vehicle.state.power.shield_generators", onLabel: "SHIELDS ON", offLabel: "SHIELDS OFF", icon: "shields" },
 	weapons: { field: "vehicle.state.power.weapons", onLabel: "WEAPONS ON", offLabel: "WEAPONS OFF", icon: "weapons" },

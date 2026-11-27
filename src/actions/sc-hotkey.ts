@@ -241,7 +241,8 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 			? { ...settings, field: preset.field, onValues: preset.onValues ?? "", onLabel: settings.onLabel || preset.onLabel, offLabel: settings.offLabel || preset.offLabel }
 			: settings;
 		const gaugeIcon = settings.icon?.startsWith("g:") ? settings.icon.slice(2) : undefined;
-		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : undefined;
+		const auto = !settings.icon || settings.icon === "auto";
+		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : auto ? preset?.defaultIcon : undefined;
 		inst.icon = inst.gaugeIcon ? "power" : settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon as HotkeyIcon) ? (settings.icon as HotkeyIcon) : (preset?.icon ?? "power");
 		inst.hasPips = PIP_ICONS.includes(inst.icon) || (!!inst.gaugeIcon && !!preset && PIP_ICONS.includes(preset.icon));
 		this.stopCog(inst);
@@ -390,7 +391,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
-			const pips = inst.hasPips ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
+			const pips = inst.hasPips ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "ring" || s.pipLayout === "icon" ? s.pipLayout : ("row" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, gaugeIcon: inst.gaugeIcon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}

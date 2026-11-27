@@ -345,7 +345,8 @@ export class ScGauge extends SingletonAction<GaugeSettings> {
 		const colors = colorsOf(s);
 		// Pips: the game doesn't report pip levels, so 66% are lit while the gauge's system is on
 		// (no state field = always on), none while it's off or there's no data.
-		const style: GaugeStyle = GAUGE_STYLES.includes(s.style as GaugeStyle) ? (s.style as GaugeStyle) : "v1";
+		// Default: style 18 (v19). A key still set to the removed "v2" falls back to v1.
+		const style: GaugeStyle = GAUGE_STYLES.includes(s.style as GaugeStyle) ? (s.style as GaugeStyle) : (s.style as string) === "v2" ? "v1" : "v19";
 		const pipCount = Math.max(1, Math.min(12, Math.round(num(s.pips, 4))));
 		const pips = { count: pipCount, filled: live && !inactive ? Math.round(pipCount * 0.66) : 0 };
 		// Animate: fuel sweeps to big changes; pips light or dim one at a time.
