@@ -14,7 +14,8 @@
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
- * icon and text while the system is off, and, when offline, every part of the key.
+ * text while the system is off, and, when offline, every part of the key (the icon stays lit
+ * while the game is reporting, even with the system off).
  *
  * The game doesn't report pip levels, so the caller passes how many pips to show and how many
  * are lit (66% when the system is on, none when off).
@@ -304,8 +305,9 @@ export function renderGauge(face: GaugeFace): string {
 
 	const pulsing = face.pulse !== undefined && !offline;
 	const iconColor = user.icon ?? (offline || pulsing || face.inactive ? normal : levelColor);
-	// Icon and text: full strength normally, faded while the system is off, pulsing while it powers on.
-	const iconOpacity = offline ? 1 : pulsing ? face.pulse! : face.inactive ? fade : 1;
+	// Icon: lit whenever the game is reporting (system on or off), pulsing while it powers on;
+	// only offline fades it (with the rest of the key). Text still fades while the system is off.
+	const iconOpacity = offline ? 1 : pulsing ? face.pulse! : 1;
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
 	const fontSize = textSize ?? (face.valueText.length > 6 ? 21 : 26);
 	const iconTransform =
