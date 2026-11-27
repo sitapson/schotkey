@@ -6,6 +6,8 @@
  *   v4  Double, swapped: pip arc outside, fuel ring inside; text below.
  *   v5  Ring + line: fuel ring as v1, no text, a straight row of pips across the bottom.
  *   v6  Ring + line, swapped: pip arc as the ring, a straight fuel bar across the bottom.
+ *   v7  v5 flipped: fuel ring open at the top, under the icon; pip row across the top.
+ *   v8  Like v7 but the fuel is a shallow 150° arc under the icon.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -17,8 +19,8 @@
 
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
-export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6"];
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8"];
 
 export interface GaugeFace {
 	style?: GaugeStyle;
@@ -217,6 +219,7 @@ export function renderGauge(face: GaugeFace): string {
 	let parts = "";
 	let showText = true;
 	let iconScale = 1;
+	let iconDy = 0; // move the icon down, for layouts with the pips on top
 	const ring: Ring = { cx: 72, cy: 66, r: 44, width: 9 };
 	const inner: Ring = { cx: 72, cy: 66, r: 32, width: 6 };
 	const lineY = 124;
@@ -240,6 +243,22 @@ export function renderGauge(face: GaugeFace): string {
 			parts = pipArc(ring, 225, 270, pips.count, pips.filled, 9, pipPaint, pips.levels) + fuelLine(30, 114, lineY, 9, n, f, face.partial, fuelPaint);
 			showText = false;
 			break;
+		case "v7": {
+			// Open at the top (45°..315° through the bottom), filling from top-left round to top-right.
+			const low: Ring = { cx: 72, cy: 80, r: 44, width: 9 };
+			parts = fuelArc(low, 45, 270, n, f, face.partial, fuelPaint, true) + pipLine(30, 114, 22, 8, pips.count, pips.filled, pipPaint, pips.levels);
+			iconDy = 14;
+			showText = false;
+			break;
+		}
+		case "v8": {
+			// A shallow 150° arc centred on the bottom (105°..255°), filling left to right.
+			const wide: Ring = { cx: 72, cy: 72, r: 50, width: 9 };
+			parts = fuelArc(wide, 105, 150, n, f, face.partial, fuelPaint, true) + pipLine(30, 114, 22, 8, pips.count, pips.filled, pipPaint, pips.levels);
+			iconDy = 8;
+			showText = false;
+			break;
+		}
 	}
 
 	const pulsing = face.pulse !== undefined && !offline;
@@ -249,7 +268,7 @@ export function renderGauge(face: GaugeFace): string {
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
 	const fontSize = face.valueText.length > 6 ? 21 : 26;
 	const iconTransform =
-		iconScale !== 1 ? ` transform="translate(72 66) scale(${iconScale}) translate(-72 -66)"` : "";
+		iconScale !== 1 || iconDy ? ` transform="translate(72 ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
 	const text = showText
 		? `<text x="72" y="130" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" font-size="${fontSize}" fill="${COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
