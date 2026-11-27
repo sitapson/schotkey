@@ -11,6 +11,7 @@
  *   v9  All-in-one: pip row on top, smaller fuel ring with the icon inside, % in the ring's gap.
  *   v10 All-in-one, side by side: pip row on top, icon left, large % right, fuel bar below.
  *   v11 All-in-one, dome: 180° fuel arc over the icon, % under the icon, pip row at the bottom.
+ *   v12 Simple: large centred icon, straight fuel bar below. No pips or text.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -23,8 +24,8 @@
 
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
-export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"];
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"];
 
 export interface GaugeFace {
 	style?: GaugeStyle;
@@ -303,6 +304,13 @@ export function renderGauge(face: GaugeFace): string {
 			textSize = face.valueText.length > 4 ? 15 : 20;
 			break;
 		}
+		case "v12":
+			// Just the icon, large and centred, with a straight fuel bar below.
+			parts = fuelLine(22, 122, 118, 12, n, f, face.partial, fuelPaint);
+			iconScale = 1.2;
+			iconDy = -4;
+			showText = false;
+			break;
 	}
 
 	const pulsing = face.pulse !== undefined && !offline;
