@@ -3,7 +3,7 @@
  * state can be shown as the key's Stream Deck title instead (the "Show state as title" option).
  */
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
-import { animatedDoorsSvg, animatedGearSvg, animatedLightsSvg, pipIconSvg } from "./user-icons";
+import { animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, pipIconSvg } from "./user-icons";
 
 export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 
@@ -38,6 +38,7 @@ export function renderHotkey(face: HotkeyFace): string {
 		face.phase === "offline" || a === undefined ? null
 		: face.icon === "lights" ? animatedLightsSvg(fg, 72, 72, 80, a)
 		: face.icon === "doors" ? animatedDoorsSvg(fg, 72, 72, 80, a)
+		: face.icon === "lamp" ? animatedLampSvg(fg, 72, 72, 80, a)
 		: null;
 	const pipped = face.pips ? pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled) : null;
 	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));

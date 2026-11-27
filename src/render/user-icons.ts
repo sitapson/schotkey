@@ -14,6 +14,7 @@ export const USER_ICON_FILES: Record<string, string> = {
 	coupled: "coupled.svg",
 	doors: "doors.svg",
 	shields: "power-shields.svg",
+	lamp: "lamp.svg",
 };
 
 const PAGE = 89.0625;
@@ -228,6 +229,31 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	const tx = CX - (b.x + b.w / 2) * s;
 	const ty = CY - (b.y + b.h / 2) * s;
 	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
+}
+
+/**
+ * Your lamp.svg ("L A M P") with each letter's brightness set separately, so the letters can light
+ * up one after another, L, A, M, P, and go out in reverse. `amount`: 0 = off (all letters faint),
+ * 1 = on (all letters full). The letter paths are found by their ids in that file.
+ */
+const LAMP_FILE = "lamp.svg";
+const LAMP_LETTERS = ["text420-2", "text422-4", "text424-1", "text425-3"]; // L, A, M, P
+
+export function animatedLampSvg(color: string, cx: number, cy: number, size: number, amount: number, dim = 0.25): string | null {
+	const body = load(LAMP_FILE);
+	if (!body) return null;
+	const b = boxOf(LAMP_FILE);
+	const s = size / Math.max(b.w, b.h);
+	const tx = cx - (b.x + b.w / 2) * s;
+	const ty = cy - (b.y + b.h / 2) * s;
+	const lit = body.replace(/<path\b([^>]*?)id="([^"]+)"/g, (m, pre: string, id: string) => {
+		const k = LAMP_LETTERS.indexOf(id);
+		if (k < 0) return m;
+		// Each letter takes 40% of the switch; they start in turn across the first 60%.
+		const level = Math.max(0, Math.min(1, (amount - k * 0.2) / 0.4));
+		return `<path opacity="${(dim + (1 - dim) * level).toFixed(2)}"${pre}id="${id}"`;
+	});
+	return `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${lit.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
 /**

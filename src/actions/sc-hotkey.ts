@@ -75,7 +75,7 @@ const GEAR_UP_ANGLE = -85;
 /** Lights and doors: how long the switch animation runs. */
 const SWITCH_MS = 1000;
 /** Icons that animate between their OFF and ON pose when the state flips. */
-const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors"];
+const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp"];
 /** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
 const PIP_ICONS: HotkeyIcon[] = ["shippower", "shields"];
 const PIPS_LIT_WHEN_ON = 0.66;

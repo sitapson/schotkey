@@ -20,10 +20,11 @@ export type HotkeyIcon =
 	| "limiter"
 	| "gsafe"
 	| "gimbals"
+	| "lamp"
 	| "shippower"
 	| "power";
 
-export const HOTKEY_ICONS: HotkeyIcon[] = ["gear", "lights", "doors", "vtol", "boost", "engines", "shields", "weapons", "coolers", "quantum", "coupled", "cruise", "limiter", "gsafe", "gimbals", "shippower", "power"];
+export const HOTKEY_ICONS: HotkeyIcon[] = ["gear", "lights", "doors", "vtol", "boost", "engines", "shields", "weapons", "coolers", "quantum", "coupled", "cruise", "limiter", "gsafe", "gimbals", "lamp", "shippower", "power"];
 
 // Path data in the 48×48 box. Kept to strokes so one colour styles everything.
 const PATHS: Record<HotkeyIcon, string> = {
@@ -57,6 +58,8 @@ const PATHS: Record<HotkeyIcon, string> = {
 	gsafe: `<circle cx="24" cy="24" r="20"/><path d="M31 17a10 10 0 1 0 2 10h-9"/>`,
 	// Target brackets with a locked centre.
 	gimbals: `<path d="M6 15V6h9M33 6h9v9M42 33v9h-9M15 42H6v-9"/><circle cx="24" cy="24" r="6"/><path d="M24 14v4M24 30v4M14 24h4M30 24h4"/>`,
+	// Night vision eye (normally replaced by the supplied lamp.svg).
+	lamp: `<path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="6"/>`,
 	// Power symbol.
 	power: `<path d="M24 4v18"/><path d="M14 10a16 16 0 1 0 20 0"/>`,
 	// Ship power (normally replaced by the supplied power.svg): lightning bolt in a ring.

@@ -82,6 +82,8 @@ export const HOTKEY_PRESETS: Record<string, HotkeyPreset> = {
 	cruise: { field: "vehicle.state.flight.settings.ifcs_cruise_mode.active", onLabel: "CRUISE ON", offLabel: "CRUISE OFF", icon: "cruise" },
 	limiter: { field: "vehicle.state.flight.settings.ifcs_speed_limiter.active", onLabel: "LIMITER ON", offLabel: "LIMITER OFF", icon: "limiter" },
 	gsafe: { field: "vehicle.state.flight.settings.ifcs_g_safe.active", onLabel: "G-SAFE ON", offLabel: "G-SAFE OFF", icon: "gsafe" },
+	// Light amplification (night vision) in the pilot seat.
+	lamp: { field: "vehicle.state.flight.settings.flight_light_amplification", onLabel: "LAMP ON", offLabel: "LAMP OFF", icon: "lamp" },
 	gimbals: { field: "weapons.settings.gimbals_locked", onLabel: "GIMBALS LOCKED", offLabel: "GIMBALS FREE", icon: "gimbals" },
 	boost: { field: "vehicle.state.flight.instruments.boost.engaged", onLabel: "BOOST ON", offLabel: "BOOST", icon: "boost" },
 };
