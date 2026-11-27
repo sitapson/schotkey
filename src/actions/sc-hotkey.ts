@@ -75,6 +75,10 @@ const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
 /** How long the switch animation runs: doors swing slowly, lights and LAMP snap on and off. */
 const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 200, lamp: 200 };
+/** Icons whose animation repeats after a press until the game confirms the new state. */
+const LOOP_ICONS: HotkeyIcon[] = ["gear", "lights", "lamp"];
+/** Pause on the end pose between repeats, so a short animation reads as a repeat, not a flicker. */
+const LOOP_HOLD_MS = 250;
 /** Icons that animate between their OFF and ON pose when the state flips. */
 const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp"];
 /** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
@@ -121,6 +125,9 @@ interface Instance {
 	flipSince?: number;
 	/** Pressed while OFF: pulsing until the game reports ON. */
 	pendingSince?: number;
+	/** Pressed: replaying the switch animation towards `loopTo` until the game reports it. */
+	loopSince?: number;
+	loopTo?: "on" | "off";
 }
 
 @action({ UUID: "com.sctelemetry.deck.hotkey" })
@@ -176,8 +183,14 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 
 		if (pressMode === "hold") return this.keyboard.press(inst.steps);
 		this.keyboard.tap(inst.steps, pressMode === "long" ? (inst.settings.longMs ?? 1000) : (inst.settings.holdMs ?? 40));
+		// Gear, lights and LAMP replay their animation until the game reports the new state.
+		if (LOOP_ICONS.includes(inst.icon) && before !== "offline") {
+			inst.loopTo = effective === "on" ? "off" : "on";
+			inst.loopSince = Date.now();
+			this.render(inst);
+		}
 		// Switching something ON that has no in-between state of its own: pulse until confirmed.
-		if (before === "off" && inst.icon !== "gear") {
+		else if (before === "off") {
 			inst.pendingSince = Date.now();
 			this.render(inst);
 		}
@@ -231,6 +244,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.lastPhase = undefined;
 		inst.lastSteady = undefined;
 		inst.flipSince = undefined;
+		inst.loopSince = undefined;
 		streamDeck.logger.debug(`${this.describe(inst)}: configured (keys "${settings.keys ?? ""}", ${inst.steps.length} step(s))`);
 		const field = inst.settings.field;
 		if (field) {
@@ -288,39 +302,55 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 
 		if (phase === "busy") inst.busySince ??= Date.now();
 		else inst.busySince = undefined;
+		// After a press: repeat until the game reports the target state, going offline, or the wait runs out.
+		let looped = false;
+		if (inst.loopSince !== undefined && (phase === inst.loopTo || phase === "offline" || (phase !== "busy" && Date.now() - inst.loopSince > PENDING_MS))) {
+			looped = phase === inst.loopTo;
+			inst.loopSince = undefined;
+		}
+		// 0..1 progress through the current repeat of a `ms` animation (then a short hold at the end).
+		const loopT = (since: number, ms: number) => Math.min(1, ((Date.now() - since) % (ms + LOOP_HOLD_MS)) / ms);
+		const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 		// Note ON <-> OFF flips (not from offline or the first reading) to animate the switch.
 		if (phase === "on" || phase === "off") {
-			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = Date.now();
+			// A flip the loop was already showing lands straight on its end pose.
+			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = looped ? undefined : Date.now();
 			inst.lastSteady = phase;
 		}
 		// Lights / doors: animate from one pose to the other when switched, then hold the pose.
 		let switchAmount: number | undefined;
-		let animating = false;
+		let animating = inst.loopSince !== undefined;
 		// Powering on: pulse until the game reports anything but OFF, or the wait runs out.
 		if (inst.pendingSince !== undefined && (phase !== "off" || Date.now() - inst.pendingSince > PENDING_MS)) inst.pendingSince = undefined;
 		const pulse = inst.pendingSince !== undefined ? pulseAt(inst.pendingSince) : undefined;
 		if (pulse !== undefined) animating = true;
 		if (SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
-			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / (SWITCH_MS[inst.icon] ?? 1000));
-			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
-			switchAmount = phase === "on" ? eased : 1 - eased;
-			animating = t < 1;
+			const ms = SWITCH_MS[inst.icon] ?? 1000;
+			if (inst.loopSince !== undefined) {
+				const eased = ease(loopT(inst.loopSince, ms));
+				switchAmount = inst.loopTo === "on" ? eased : 1 - eased;
+			} else {
+				const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / ms);
+				switchAmount = phase === "on" ? ease(t) : 1 - ease(t);
+				animating ||= t < 1;
+			}
 		}
 		// One frame timer drives the cog, the gear swing and the lights.
 		if (phase === "busy" || animating) this.startCog(inst);
 		else this.stopCog(inst);
 		// Landing gear is drawn by pose: hanging down when deployed (ON), folded up when retracted
-		// (OFF), and swinging between the two while moving (eased like an actuator, holding the end
-		// pose if the game takes longer than GEAR_SWING_MS to report it finished).
+		// (OFF), and swinging between the two while moving (eased like an actuator, repeating until
+		// the game reports it finished). After a press it starts swinging before DEPLOYING arrives.
 		let gearAngle: number | undefined;
 		if (inst.icon === "gear") {
-			if (phase === "on") gearAngle = 0;
+			const swing = (since: number, down: boolean) => {
+				const eased = ease(loopT(since, GEAR_SWING_MS));
+				return GEAR_UP_ANGLE * (down ? 1 - eased : eased);
+			};
+			if (phase === "busy" && inst.busySince !== undefined) gearAngle = swing(inst.loopSince ?? inst.busySince, headingOn(inst.value as string));
+			else if (inst.loopSince !== undefined) gearAngle = swing(inst.loopSince, inst.loopTo === "on");
+			else if (phase === "on") gearAngle = 0;
 			else if (phase === "off") gearAngle = GEAR_UP_ANGLE;
-			else if (phase === "busy" && inst.busySince !== undefined) {
-				const t = Math.min(1, (Date.now() - inst.busySince) / GEAR_SWING_MS);
-				const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
-				gearAngle = GEAR_UP_ANGLE * (headingOn(inst.value as string) ? 1 - eased : eased);
-			}
 		}
 
 		// The state in words. Not drawn on the image; optionally shown as the key's title.
