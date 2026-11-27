@@ -323,18 +323,22 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		if (phase === "busy") inst.busySince ??= Date.now();
 		else inst.busySince = undefined;
 		// After a press: repeat until the game reports the target state, going offline, or the wait runs out.
-		let looped = false;
-		if (inst.loopSince !== undefined && (phase === inst.loopTo || phase === "offline" || (phase !== "busy" && Date.now() - inst.loopSince > PENDING_MS))) {
-			looped = phase === inst.loopTo;
-			inst.loopSince = undefined;
-		}
 		// 0..1 progress through the current repeat of a `ms` animation (then a short hold at the end).
 		const loopT = (since: number, ms: number) => Math.min(1, ((Date.now() - since) % (ms + LOOP_HOLD_MS)) / ms);
 		const ease = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+		const switchMs = SWITCH_MS[inst.icon] ?? 1000;
+		let looped = false;
+		let loopProgress = 1;
+		if (inst.loopSince !== undefined && (phase === inst.loopTo || phase === "offline" || (phase !== "busy" && Date.now() - inst.loopSince > PENDING_MS))) {
+			looped = phase === inst.loopTo;
+			loopProgress = loopT(inst.loopSince, switchMs);
+			inst.loopSince = undefined;
+		}
 		// Note ON <-> OFF flips (not from offline or the first reading) to animate the switch.
 		if (phase === "on" || phase === "off") {
-			// A flip the loop was already showing lands straight on its end pose.
-			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = looped ? undefined : Date.now();
+			// A flip the pressed key was already animating carries on from where it got to and
+			// finishes, rather than jumping to the end (the game often confirms within ~50 ms).
+			if (inst.lastSteady && inst.lastSteady !== phase) inst.flipSince = Date.now() - (looped ? loopProgress * switchMs : 0);
 			inst.lastSteady = phase;
 		}
 		// Lights / doors: animate from one pose to the other when switched, then hold the pose.
