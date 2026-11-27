@@ -88,6 +88,8 @@ const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 20
 const LOOP_ICONS: HotkeyIcon[] = ["gear", "lights", "lamp", "coupled"];
 /** Pause on the end pose between repeats, so a short animation reads as a repeat, not a flicker. */
 const LOOP_HOLD_MS = 250;
+/** "Only press if" (press only when not already ON / OFF): off for now, and hidden in the panels. */
+const ENSURE_ENABLED = false;
 /** Pips light or go out one at a time over this long (as on SC Gauge). */
 const PIP_ANIM_MS = 250;
 /** Icons that animate between their OFF and ON pose when the state flips. */
@@ -184,7 +186,10 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 	override async onKeyDown(ev: KeyDownEvent<HotkeySettings>): Promise<void> {
 		const inst = this.instances.get(ev.action.id);
 		if (!inst || inst.steps.length === 0) return void ev.action.showAlert();
-		const { pressMode = "tap", ensure = "none", verify = true } = inst.settings;
+		const { pressMode = "tap", verify = true } = inst.settings;
+		// "Only press if" is switched off for now (no setting in the panels): every press is sent.
+		// Set ENSURE_ENABLED to bring it back; keys keep any value they saved.
+		const ensure = ENSURE_ENABLED ? (inst.settings.ensure ?? "none") : "none";
 		const before = this.phase(inst);
 		const valueBefore = inst.value;
 		// A new press supersedes any pending check from an earlier one.
