@@ -191,13 +191,14 @@ export const PIP_ICON_FILES: Record<string, string> = {
 
 export type PipLayout = "ring" | "row" | "icon";
 
-export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: PipLayout = "ring"): string | null {
+/** `color` is the symbol; `pipColor` the pips (defaults to the symbol colour). */
+export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: PipLayout = "ring", pipColor = color): string | null {
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
 	let removed = 0;
 	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
-	if (layout !== "ring") return (layout === "row" ? pipRow(color, count, filled) : "") + boundarySymbol(file, symbol, color);
+	if (layout !== "ring") return (layout === "row" ? pipRow(pipColor, count, filled) : "") + boundarySymbol(file, symbol, color);
 
 	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
 	// starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear space
@@ -217,7 +218,7 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 		const a1 = START + (i + 1) * per - (i === n - 1 ? CAP : GAP / 2 + CAP);
 		if (a1 <= a0) continue;
 		const lit = i < filled;
-		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}/>`;
+		ring += `<path d="M${at(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${at(a1)}" fill="none" stroke="${pipColor}" stroke-width="${WIDTH}" stroke-linecap="round"${lit ? "" : ` opacity="0.28"`}/>`;
 	}
 
 	// The symbol keeps its size relative to the original bars, which circled the whole artwork:

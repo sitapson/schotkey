@@ -60,6 +60,9 @@ type HotkeySettings = {
 	/** Icon colour in each state. */
 	onIconColor?: string;
 	offIconColor?: string;
+	/** Power keys: pip colour when ON / OFF (unset = the icon colour). Busy and offline use the OFF one. */
+	onPipColor?: string;
+	offPipColor?: string;
 	busyIconColor?: string;
 	offlineIconColor?: string;
 	/** Offline: the icon in its OFF colour at this opacity, percent (default 20). */
@@ -378,7 +381,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 				: phase === "on" ? s.onIconColor
 				: s.offIconColor;
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
-			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const) } : undefined;
+			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
 			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}

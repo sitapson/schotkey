@@ -25,7 +25,7 @@ export interface HotkeyFace {
 	/** Lights / doors: how far switched (0 = off / shut, 1 = on / open). Drawn instead of the static icon. */
 	switchAmount?: number;
 	/** Power icons: the pip ring around the symbol. */
-	pips?: { count: number; filled: number; layout?: PipLayout };
+	pips?: { count: number; filled: number; layout?: PipLayout; /** Pip colour (default: the icon colour). */ color?: string };
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -40,7 +40,7 @@ export function renderHotkey(face: HotkeyFace): string {
 		: face.icon === "doors" ? animatedDoorsSvg(fg, 72, 72, 80, a)
 		: face.icon === "lamp" ? animatedLampSvg(fg, 72, 72, 80, a)
 		: null;
-	const pipped = face.pips ? pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled, face.pips.layout) : null;
+	const pipped = face.pips ? pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled, face.pips.layout, face.pips.color ?? fg) : null;
 	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
