@@ -44,6 +44,9 @@ export const GAUGE_ICONS = {
 	// Supplied
 	hydrogen: { name: "Hydrogen", file: "hydrogen.svg" },
 	shippower: { name: "Ship power", file: "power.svg", symbol: true },
+	"power-plant-01": { name: "Power plant", file: "power-plant-01.svg" },
+	"power-plant-02": { name: "Power plant 2", file: "power-plant-02.svg" },
+	engines: { name: "Engines (thrust)", file: "engines.svg" },
 	"power-engines": { name: "Engines", file: "power-engines.svg", symbol: true },
 	"power-shields": { name: "Shields", file: "power-shields.svg", symbol: true },
 	"power-weapons": { name: "Weapons", file: "power-weapons.svg", symbol: true },

@@ -9,8 +9,9 @@ import { execFileSync } from "node:child_process";
 
 const dir = "com.sctelemetry.deck.sdPlugin/imgs/icons";
 const files = readdirSync(dir).filter((f) => f.endsWith(".svg"));
-// Power icons (power.svg, power-*.svg): their first four paths are corner bars the plugin can replace.
-const SYMBOL_FILES = readdirSync(dir).filter((f) => /^power(-[\w-]+)?\.svg$/.test(f));
+// Power icons with four corner bars around a symbol (the bars can be replaced by pips or dropped).
+// Listed by name: other power-*.svg files (e.g. power-plant-01.svg) have no bars.
+const SYMBOL_FILES = ["power.svg", "power-coolers.svg", "power-engines.svg", "power-gravity.svg", "power-life-support.svg", "power-quantum.svg", "power-shields.svg", "power-weapons.svg"];
 const browser = [
 	"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
 	"C:/Program Files/Microsoft/Edge/Application/msedge.exe",
