@@ -375,11 +375,12 @@ export function renderGauge(face: GaugeFace): string {
 		}
 		case "v9": {
 			// Pips across the top; a smaller fuel ring below with the icon inside and the % in its gap.
-			const mid: Ring = { cx: 72, cy: 82, r: 38, width: 8 };
+			// Ring, icon and % move together so the icon sits at the key's centre (72, 72).
+			const mid: Ring = { cx: 72, cy: 72, r: 38, width: 8 };
 			parts = fuelArc(mid, 225, 270, n, f, face.partial, fuelPaint) + pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels);
 			// Full-size icon, as in style 1, centred in the ring.
-			iconDy = 16;
-			textY = 129;
+			iconDy = 6;
+			textY = 119;
 			textSize = face.valueText.length > 4 ? 15 : 19;
 			break;
 		}
