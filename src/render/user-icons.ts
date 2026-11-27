@@ -288,31 +288,59 @@ function boundarySymbol(file: string, symbol: string, color: string): string {
 
 /**
  * Your coupled.svg (a "target" ring with an arrow up out of it) with the arrow sliding in and out:
- * `arrowOut` 1 = the arrow in its place (decoupled), 0 = hidden inside the target (coupled). The
- * arrow is clipped below its own base line, so it rises out of the target through the gap at the
- * top of the ring. The ring and dot never move; the icon is sized by the whole drawing (arrow
- * included) so the target stays put. Shape ids and coordinates are from coupled.svg.
+ * `arrowOut` 1 = the arrow in its place (decoupled), 0 = hidden inside the target (coupled).
+ *
+ * The arrow rises out of the target through the gap at the top of the ring: its outline is cut at
+ * its own base line (done here as geometry, because Stream Deck's renderer doesn't support SVG clip
+ * paths). Whatever is showing fills the icon boundary, so the target alone (coupled) is drawn
+ * large and the whole icon shrinks as the arrow comes out.
+ *
+ * Shape id, arrow points and page-space sizes are from coupled.svg (measured in a browser).
  */
 const COUPLED_FILE = "coupled.svg";
-const COUPLED_ARROW = "polygon780-1";
-const COUPLED_ARROW_TIP = 7290.33; // in the arrow's own coordinates
+
+/** The arrow's points, in its own (file) coordinates. Tip at y 7290.33, base at 7318.74. */
+const COUPLED_ARROW_POINTS: [number, number][] = [
+	[9626.42, 7304.49], [9616.67, 7304.49], [9616.67, 7318.74], [9611.89, 7318.74],
+	[9611.89, 7304.49], [9602.23, 7304.49], [9614.32, 7290.33],
+];
+const COUPLED_ARROW_TIP = 7290.33;
 const COUPLED_ARROW_BASE = 7318.74;
+/** On the page: the target (ring and dot) alone, and the arrow's tip and height. */
+const COUPLED_RING = { x: 31.677, y: 38.943, w: 25.713, h: 24.419 };
+const COUPLED_ARROW_PAGE = { tip: 25.701, height: 17.83 };
+
+/** Points of a polygon cut to the part with y <= limit (one half-plane, Sutherland–Hodgman). */
+function cutBelow(points: [number, number][], limit: number): [number, number][] {
+	const out: [number, number][] = [];
+	for (let i = 0; i < points.length; i++) {
+		const a = points[i], b = points[(i + 1) % points.length];
+		const aIn = a[1] <= limit, bIn = b[1] <= limit;
+		if (aIn) out.push(a);
+		if (aIn !== bIn) out.push([a[0] + ((limit - a[1]) / (b[1] - a[1])) * (b[0] - a[0]), limit]);
+	}
+	return out;
+}
 
 export function animatedCoupledSvg(color: string, cx: number, cy: number, size: number, arrowOut: number): string | null {
 	const body = load(COUPLED_FILE);
 	if (!body) return null;
-	const b = boxOf(COUPLED_FILE);
-	const s = size / Math.max(b.w, b.h);
-	const tx = cx - (b.x + b.w / 2) * s;
-	const ty = cy - (b.y + b.h / 2) * s;
 	const out = Math.max(0, Math.min(1, arrowOut));
-	// Fully in: the tip sits on the base line, so the whole arrow is below the clip.
-	const dy = ((1 - out) * (COUPLED_ARROW_BASE - COUPLED_ARROW_TIP)).toFixed(2);
-	const clip =
-		`<clipPath id="coupled-arrow"><rect x="9500" y="${COUPLED_ARROW_TIP - 50}" width="300" height="${COUPLED_ARROW_BASE - COUPLED_ARROW_TIP + 50}"/></clipPath>`;
-	const art = body.replace(new RegExp(`<polygon\\b[^>]*\\bid="${COUPLED_ARROW}"[^>]*/>`), (arrow) =>
-		out <= 0.001 ? "" : `${clip}<g clip-path="url(#coupled-arrow)"><g transform="translate(0 ${dy})">${arrow}</g></g>`,
+	// The arrow, moved down into the target and cut at its base line.
+	const dy = (1 - out) * (COUPLED_ARROW_BASE - COUPLED_ARROW_TIP);
+	const shown = out <= 0.001 ? [] : cutBelow(COUPLED_ARROW_POINTS.map(([x, y]) => [x, y + dy] as [number, number]), COUPLED_ARROW_BASE);
+	// The arrow element (points come before its id in coupled.svg) with its points replaced.
+	const arrowTag = /<polygon\b([^>]*?)\bpoints="[^"]*"([^>]*\bid="polygon780-1"[^>]*)\/>/;
+	const art = body.replace(arrowTag, (_m, before: string, after: string) =>
+		shown.length < 3 ? "" : `<polygon${before}points="${shown.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ")}"${after}/>`,
 	);
+	// What's showing, on the page: the target, plus the arrow above it as it comes out.
+	const tip = COUPLED_ARROW_PAGE.tip + (1 - out) * COUPLED_ARROW_PAGE.height;
+	const top = Math.min(COUPLED_RING.y, tip);
+	const box = { x: COUPLED_RING.x, y: top, w: COUPLED_RING.w, h: COUPLED_RING.y + COUPLED_RING.h - top };
+	const s = size / Math.max(box.w, box.h);
+	const tx = cx - (box.x + box.w / 2) * s;
+	const ty = cy - (box.y + box.h / 2) * s;
 	return `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${art.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
