@@ -128,7 +128,6 @@ const COLORS = {
 	normal: "#3fd0c9",
 	warn: "#f2c230",
 	alert: "#ff4f4f",
-	bg: "#0e161c",
 	panel: "#13202a",
 	text: "#e9f2f6",
 };
@@ -463,12 +462,8 @@ export function renderGauge(face: GaugeFace): string {
 		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${user.text ?? COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
 
-	// A chosen background fills the whole key (outer frame and panel) so it reads as one colour.
-	const bg = user.background ?? COLORS.bg;
-	const panel = user.background ?? COLORS.panel;
-	const background =
-		`<rect width="144" height="144" fill="${bg}"/>` +
-		`<rect x="4" y="4" width="136" height="136" rx="14" fill="${panel}" stroke="#2b3a45" stroke-width="2"/>`;
+	// The background fills the whole key: no frame, outline or inset panel.
+	const background = `<rect width="144" height="144" fill="${user.background ?? COLORS.panel}"/>`;
 	const content = parts + `<g${op(iconOpacity)}><g${iconTransform}>${icon(face.icon, iconColor)}</g></g>` + text;
 
 	const svg =

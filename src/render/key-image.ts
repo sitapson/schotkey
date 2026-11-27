@@ -20,8 +20,8 @@ export function renderKey({ label, color, value, live }: KeyFace): string {
 	const valueText = value ? `<text x="72" y="122" font-size="30" font-weight="700">${esc(value)}</text>` : "";
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
-		`<rect width="144" height="144" fill="#12171d"/>` +
-		`<rect x="6" y="6" width="132" height="132" rx="14" fill="${esc(color)}"/>` +
+		// The colour fills the whole key: no frame around it.
+		`<rect width="144" height="144" fill="${esc(color)}"/>` +
 		`<g fill="#fff" font-family="Segoe UI, Arial, sans-serif" font-weight="600" text-anchor="middle">${text}${valueText}</g>` +
 		`</svg>`;
 	return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`;

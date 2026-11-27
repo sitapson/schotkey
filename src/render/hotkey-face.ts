@@ -57,8 +57,8 @@ export function renderHotkey(face: HotkeyFace): string {
 	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : face.gaugeIcon ? gaugeIconInBoundary(face.gaugeIcon, fg) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
-		`<rect width="144" height="144" fill="#12171d"/>` +
-		`<rect x="6" y="6" width="132" height="132" rx="14" fill="${esc(face.color)}"/>` +
+		// The state colour fills the whole key: no frame around it.
+		`<rect width="144" height="144" fill="${esc(face.color)}"/>` +
 		(face.iconOpacity !== undefined && face.iconOpacity < 1 ? `<g opacity="${face.iconOpacity.toFixed(2)}">${art}</g>` : art) +
 		`</svg>`;
 	return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svg)}`;
