@@ -4,7 +4,7 @@
   "Name": "SC Telemetry Deck",
   "Author": "SC Telemetry Deck",
   "Description": "Hotkeys for Star Citizen whose icons follow the game's live telemetry.",
-  "Version": "0.2.0.0",
+  "Version": "0.3.0.0",
   "Category": "SC Telemetry Deck",
   "CategoryIcon": "imgs/plugin/category",
   "Icon": "imgs/plugin/icon",
@@ -25,10 +25,27 @@
   ],
   "Actions": [
     {
+      "Name": "SC Button",
+      "UUID": "com.sctelemetry.deck.key",
+      "Icon": "imgs/actions/hotkey/icon",
+      "Tooltip": "A Star Citizen key: a hotkey, a system with its status, a power system with pips, or a gauge. Choose in the dropdown.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "PropertyInspectorPath": "ui/key.html",
+      "SupportedInMultiActions": true,
+      "States": [
+        {
+          "Image": "imgs/actions/hotkey/key",
+          "ShowTitle": true
+        }
+      ]
+    },
+    {
       "Name": "SC Hotkey",
       "UUID": "com.sctelemetry.deck.hotkey",
       "Icon": "imgs/actions/hotkey/icon",
-      "Tooltip": "Sends a key combo; the icon follows a telemetry field.",
+      "Tooltip": "(Old: use SC Button) Sends a key combo; the icon follows a telemetry field.",
       "Controllers": [
         "Keypad"
       ],
@@ -39,7 +56,8 @@
           "Image": "imgs/actions/hotkey/key",
           "ShowTitle": true
         }
-      ]
+      ],
+      "VisibleInActionsList": false
     },
     {
       "Name": "Telemetry Status",
@@ -61,7 +79,7 @@
       "Name": "SC Gauge",
       "UUID": "com.sctelemetry.deck.gauge",
       "Icon": "imgs/actions/gauge/icon",
-      "Tooltip": "Segmented ring gauge for a telemetry value, e.g. hydrogen or quantum fuel.",
+      "Tooltip": "(Old: use SC Button) Segmented ring gauge for a telemetry value, e.g. hydrogen or quantum fuel.",
       "Controllers": [
         "Keypad"
       ],
@@ -72,7 +90,8 @@
           "Image": "imgs/actions/gauge/key",
           "ShowTitle": false
         }
-      ]
+      ],
+      "VisibleInActionsList": false
     }
   ]
 }

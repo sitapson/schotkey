@@ -59,6 +59,8 @@ type GaugeSettings = {
 	/** Pip colour (unset = the gauge's normal colour). */
 	pipColor?: string;
 	textColor?: string;
+	/** Message text colour (ENG OFF, QT OFF, --%). */
+	msgColor?: string;
 	/** Strength of faded parts, percent (default 20): offline, unlit pips, empty fuel, system off. */
 	offlineOpacity?: number | string;
 	/** Look: v1 classic ring, v2 split pips/fuel, v3 fuel ring with inner pips. */
@@ -77,7 +79,9 @@ function colorsOf(s: GaugeSettings): GaugeColors {
 		alert: hex(s.alertColor),
 		pips: hex(s.pipColor),
 		text: hex(s.textColor),
-		icon: s.iconFollows === false ? hex(s.iconColor) : undefined,
+		message: hex(s.msgColor),
+		// White by default; "follow level" (iconFollows) uses the gauge colour instead.
+		icon: s.iconFollows === true ? undefined : (hex(s.iconColor) ?? "#ffffff"),
 	};
 }
 

@@ -122,22 +122,24 @@ export interface GaugeColors {
 	normal?: string;
 	warn?: string;
 	alert?: string;
-	/** Pip colour. Unset = the gauge's normal colour. */
+	/** Pip colour. Unset = white. */
 	pips?: string;
-	/** Fixed icon colour. Unset = the icon follows the gauge colour (normal / low / critical). */
+	/** Icon colour. Unset = the icon follows the gauge colour (normal / warning / critical). */
 	icon?: string;
-	/** Value text colour. Unset = light grey-white. */
+	/** Value text (the %). Unset = the gauge's normal colour. */
 	text?: string;
+	/** Message text (ENG OFF, QT OFF, --%). Unset = white. */
+	message?: string;
 }
 
-export const DEFAULT_GAUGE_COLORS = { background: "#13202a", normal: "#3fd0c9", warn: "#f2c230", alert: "#ff4f4f" };
+// Defaults: black background, cyan gauge, yellow warning, red critical, white pips / icon / messages.
+export const DEFAULT_GAUGE_COLORS = { background: "#000000", normal: "#3fd0c9", warn: "#f2c230", alert: "#ff4f4f" };
 
 const COLORS = {
 	normal: "#3fd0c9",
 	warn: "#f2c230",
 	alert: "#ff4f4f",
-	panel: "#13202a",
-	text: "#e9f2f6",
+	panel: "#000000",
 };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -329,7 +331,7 @@ export function renderGauge(face: GaugeFace): string {
 	// With the system off the game reports 0 (e.g. hydrogen with engines off), which isn't "critical",
 	// so a switched-off gauge keeps its normal colour.
 	const fuelPaint: Paint = { color: face.inactive ? normal : levelColor, fade: offline ? 1 : fade, lit: 1 };
-	const pipPaint: Paint = { color: user.pips ?? normal, fade: offline ? 1 : fade, lit: 1 };
+	const pipPaint: Paint = { color: user.pips ?? "#ffffff", fade: offline ? 1 : fade, lit: 1 };
 
 	let parts = "";
 	let showText = true;
@@ -484,8 +486,11 @@ export function renderGauge(face: GaugeFace): string {
 		fitIcon && box
 			? ` transform="${fitToBoundary(box)}"`
 			: iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
+	// The value (a number or %) in the gauge colour; messages like ENG OFF or --% in white.
+	const isValue = /d/.test(face.valueText);
+	const textColor = isValue ? (user.text ?? normal) : (user.message ?? "#ffffff");
 	const text = showText
-		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${user.text ?? COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
+		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${textColor}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
 
 	// The background fills the whole key: no frame, outline or inset panel.

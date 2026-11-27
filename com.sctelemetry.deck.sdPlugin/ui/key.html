@@ -1,0 +1,379 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+		<script src="key-recorder.js"></script>
+		<script src="key.js" defer></script>
+		<style>
+			details { margin: 12px 0 4px; }
+			summary { cursor: pointer; color: #9aa4ad; font-size: 9pt; padding: 4px 0 8px 2px; }
+			.group { font-family: "Segoe UI", system-ui, sans-serif; margin: 14px 0 4px 2px; padding-top: 8px; border-top: 1px solid #3a3a3a; color: #e6e6e6; font-size: 9pt; font-weight: 600; }
+			.first { border-top: 0; padding-top: 0; margin-top: 4px; }
+			.group span { display: block; margin-top: 2px; color: #8e959c; font-weight: 400; font-size: 8pt; }
+			[data-show] { display: none; }
+		</style>
+	</head>
+	<body>
+		<!--
+			One dropdown decides what this key is. Everything below it is tagged with data-show: the
+			kinds it applies to (hotkey, status, power, gauge) or exact choices (status:custom…);
+			key.js shows only what applies. Values match src/buttons.ts.
+		-->
+		<sdpi-item label="Button">
+			<sdpi-select setting="button" placeholder="Choose what this key does">
+				<option value="hotkey">Hotkey</option>
+				<optgroup label="Hotkey with status">
+					<option value="status:gear">Landing gear</option>
+					<option value="status:lights">Lights</option>
+					<option value="status:doors">Doors</option>
+					<option value="status:lamp">LAMP (light amplification)</option>
+					<option value="status:vtol">VTOL</option>
+					<option value="status:coupled">Coupled / decoupled</option>
+					<option value="status:cruise">Cruise control</option>
+					<option value="status:limiter">Speed limiter</option>
+					<option value="status:gsafe">G-safe</option>
+					<option value="status:gimbals">Gimbal lock</option>
+					<option value="status:boost">Boost</option>
+					<option value="status:custom">Custom (choose a field)</option>
+				</optgroup>
+				<optgroup label="Power">
+					<option value="power:shippower">Ship power</option>
+					<option value="power:engines">Engines</option>
+					<option value="power:shields">Shields</option>
+					<option value="power:weapons">Weapons</option>
+					<option value="power:coolers">Coolers</option>
+					<option value="power:quantum">Quantum drive</option>
+					<option value="power:lifesupport">Life support</option>
+					<option value="power:gravity">Gravity</option>
+					<option value="power:sensors">Sensors</option>
+				</optgroup>
+				<optgroup label="Gauge">
+					<option value="gauge:hydrogen">Engines (hydrogen fuel)</option>
+					<option value="gauge:quantum">Quantum (quantum fuel)</option>
+					<option value="gauge:boost">Boost (reserves)</option>
+					<option value="gauge:oxygen">Oxygen</option>
+					<option value="gauge:health">Health</option>
+					<option value="gauge:custom">Custom (choose a field)</option>
+				</optgroup>
+			</sdpi-select>
+		</sdpi-item>
+
+		<!-- ===== Gauge layout ===== -->
+		<div data-show="gauge">
+			<sdpi-item label="Style">
+				<sdpi-select setting="style" default="v19">
+					<option value="v1">1 · Ring and %</option>
+					<option value="v3">2 · Fuel ring, pips inside</option>
+					<option value="v4">3 · Pips ring, fuel inside</option>
+					<option value="v5">4 · Fuel ring, pip row below</option>
+					<option value="v6">5 · Pips ring, fuel bar below</option>
+					<option value="v7">6 · Fuel ring below, pip row on top</option>
+					<option value="v8">7 · Shallow fuel arc, pip row on top</option>
+					<option value="v9">8 · All-in-one: pips, fuel ring, %</option>
+					<option value="v10">9 · All-in-one: icon and big %, fuel bar</option>
+					<option value="v11">10 · All-in-one: fuel dome, %, pips</option>
+					<option value="v12">11 · All-in-one: pips, icon, fuel bar, %</option>
+					<option value="v13">12 · Big icon</option>
+					<option value="v14">13 · Big icon, pip row</option>
+					<option value="v15">14 · Big icon, fuel bar, %</option>
+					<option value="v16">15 · Big icon, pips, fuel bar, %</option>
+					<option value="v17">16 · Pips, flipped fuel ring, no %</option>
+					<option value="v18">17 · Big icon, pips, flipped fuel ring</option>
+					<option value="v19">18 · Big icon, pips, short flipped fuel ring</option>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== Icon (hotkey, status, power) ===== -->
+		<div data-show="hotkey status power">
+			<sdpi-item label="Icon">
+				<sdpi-select setting="icon" default="auto">
+					<option value="auto">From the button choice</option>
+					<optgroup label="Animated">
+						<option value="gear">Landing gear</option>
+						<option value="lights">Headlights</option>
+						<option value="doors">Doors</option>
+						<option value="lamp">LAMP</option>
+					</optgroup>
+					<optgroup label="Fuel and vitals">
+						<option value="g:hydrogen">Hydrogen</option>
+						<option value="g:hexagon">Hydrogen (hexagon)</option>
+						<option value="g:quantum">Quantum (atom)</option>
+						<option value="g:boost">Boost</option>
+						<option value="g:oxygen">Oxygen</option>
+						<option value="g:health">Health</option>
+					</optgroup>
+					<optgroup label="Power">
+						<option value="shippower">Ship power (with pips)</option>
+						<option value="g:power-plant-01">Power plant</option>
+						<option value="g:power-plant-02">Power plant 2</option>
+						<option value="g:engines">Engines (thrust)</option>
+						<option value="g:power-engines">Engines</option>
+						<option value="shields">Shields (with pips)</option>
+						<option value="g:power-weapons">Weapons</option>
+						<option value="g:power-coolers">Coolers</option>
+						<option value="g:power-quantum">Quantum drive</option>
+						<option value="g:power-life-support">Life support</option>
+						<option value="g:power-gravity">Gravity</option>
+					</optgroup>
+					<optgroup label="Ship">
+						<option value="g:vtol">VTOL</option>
+						<option value="coupled">Coupled</option>
+						<option value="g:config">Cycle configuration</option>
+					</optgroup>
+					<optgroup label="Other">
+						<option value="g:comms">Comms</option>
+						<option value="g:pip">Ship marker</option>
+						<option value="g:tobii">Head tracking</option>
+						<option value="g:mirai">Mirai logo</option>
+					</optgroup>
+					<optgroup label="Line icons">
+						<option value="engines">Jet engine</option>
+						<option value="weapons">Crosshair</option>
+						<option value="coolers">Snowflake</option>
+						<option value="quantum">Atom</option>
+						<option value="boost">Chevrons</option>
+						<option value="vtol">VTOL (line)</option>
+						<option value="cruise">Cruise control</option>
+						<option value="limiter">Speed limiter</option>
+						<option value="gsafe">G-safe</option>
+						<option value="gimbals">Gimbals</option>
+						<option value="power">Power symbol</option>
+					</optgroup>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== Icon (gauge) ===== -->
+		<div data-show="gauge">
+			<sdpi-item label="Icon">
+				<sdpi-select setting="gaugeIcon" default="auto">
+					<option value="auto">From the gauge choice</option>
+					<optgroup label="Fuel and vitals">
+						<option value="hydrogen">Hydrogen</option>
+						<option value="hexagon">Hydrogen (hexagon)</option>
+						<option value="quantum">Quantum (atom)</option>
+						<option value="boost">Boost</option>
+						<option value="oxygen">Oxygen</option>
+						<option value="health">Health</option>
+					</optgroup>
+					<optgroup label="Power">
+						<option value="shippower">Ship power</option>
+						<option value="power-plant-01">Power plant</option>
+						<option value="power-plant-02">Power plant 2</option>
+						<option value="engines">Engines (thrust)</option>
+						<option value="power-engines">Engines</option>
+						<option value="power-shields">Shields</option>
+						<option value="power-weapons">Weapons</option>
+						<option value="power-coolers">Coolers</option>
+						<option value="power-quantum">Quantum drive</option>
+						<option value="power-life-support">Life support</option>
+						<option value="power-gravity">Gravity</option>
+					</optgroup>
+					<optgroup label="Ship">
+						<option value="landing-gear">Landing gear</option>
+						<option value="headlights">Headlights</option>
+						<option value="doors">Doors</option>
+						<option value="vtol">VTOL</option>
+						<option value="coupled">Coupled</option>
+						<option value="config">Cycle configuration</option>
+						<option value="lamp">LAMP</option>
+					</optgroup>
+					<optgroup label="Other">
+						<option value="comms">Comms</option>
+						<option value="pip">Ship marker</option>
+						<option value="tobii">Head tracking</option>
+						<option value="mirai">Mirai logo</option>
+						<option value="none">No icon</option>
+					</optgroup>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== Pips (power, gauge) ===== -->
+		<div data-show="power gauge">
+			<sdpi-item label="Pips">
+				<sdpi-range setting="pips" min="1" max="12" step="1" default="4" showlabels></sdpi-range>
+			</sdpi-item>
+		</div>
+		<div data-show="power">
+			<sdpi-item label="Pip layout">
+				<sdpi-select setting="pipLayout" default="row">
+					<option value="ring">Ring around the icon</option>
+					<option value="row">Big icon, pip row on top</option>
+					<option value="icon">Big icon, no pips</option>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== The key press ===== -->
+		<div data-show="hotkey status power gauge">
+			<sdpi-item label="Key to press">
+				<key-recorder setting="keys"></key-recorder>
+			</sdpi-item>
+		</div>
+		<div data-show="hotkey status power">
+			<sdpi-item label="Press">
+				<sdpi-select setting="pressMode" default="tap">
+					<option value="tap">Tap</option>
+					<option value="hold">Hold while pressed</option>
+					<option value="long">Long press</option>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+		<div data-show="status power">
+			<sdpi-item label="Only press if">
+				<sdpi-select setting="ensure" default="none">
+					<option value="none">Always press (toggle)</option>
+					<option value="on">Not already ON</option>
+					<option value="off">Not already OFF</option>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+		<div data-show="status power gauge">
+			<sdpi-item label="Check it worked">
+				<sdpi-checkbox setting="verify" default="true" label="Show ⚠ if the press changed nothing"></sdpi-checkbox>
+			</sdpi-item>
+		</div>
+		<div data-show="status power">
+			<sdpi-item label="Title">
+				<sdpi-checkbox setting="stateTitle" label="Show state as title (GEAR DOWN, DEPLOYING…)"></sdpi-checkbox>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== Gauge levels ===== -->
+		<div data-show="gauge">
+			<sdpi-item label="Segments">
+				<sdpi-range setting="segments" min="1" max="24" step="1" default="10" showlabels></sdpi-range>
+			</sdpi-item>
+			<sdpi-item label="Partial fill">
+				<sdpi-checkbox setting="partial" default="true" label="Partly fill the last segment"></sdpi-checkbox>
+			</sdpi-item>
+			<sdpi-item label="Warning at or below %">
+				<sdpi-textfield setting="warnAt" default="50" pattern="[0-9.]*"></sdpi-textfield>
+			</sdpi-item>
+			<sdpi-item label="Critical at or below %">
+				<sdpi-textfield setting="alertAt" default="15" pattern="[0-9.]*"></sdpi-textfield>
+			</sdpi-item>
+		</div>
+
+		<!-- ===== Colours ===== -->
+		<div data-show="hotkey status power gauge">
+			<details>
+				<summary>Colours</summary>
+
+				<div data-show="hotkey">
+					<div class="group first">Key</div>
+					<sdpi-item label="Background"><sdpi-color setting="offColor" default="#000000"></sdpi-color></sdpi-item>
+					<sdpi-item label="Icon"><sdpi-color setting="offIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+				</div>
+
+				<div data-show="status power">
+					<div class="group first">When ON <span>gear down, lights on, powered…</span></div>
+					<sdpi-item label="Background"><sdpi-color setting="onColor" default="#000000"></sdpi-color></sdpi-item>
+					<sdpi-item label="Icon"><sdpi-color setting="onIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+					<div data-show="power"><sdpi-item label="Pips"><sdpi-color setting="onPipColor" default="#ffffff"></sdpi-color></sdpi-item></div>
+
+					<div class="group">When OFF <span>gear up, lights off, unpowered…</span></div>
+					<sdpi-item label="Background"><sdpi-color setting="offColor" default="#000000"></sdpi-color></sdpi-item>
+					<sdpi-item label="Icon"><sdpi-color setting="offIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+					<div data-show="power"><sdpi-item label="Pips"><sdpi-color setting="offPipColor" default="#ffffff"></sdpi-color></sdpi-item></div>
+
+					<div data-show="status">
+						<div class="group">While moving <span>deploying, retracting</span></div>
+						<sdpi-item label="Background"><sdpi-color setting="busyColor" default="#000000"></sdpi-color></sdpi-item>
+						<sdpi-item label="Icon"><sdpi-color setting="busyIconColor" default="#ffffff"></sdpi-color></sdpi-item>
+					</div>
+
+					<div class="group">Offline <span>no data from the game; icon uses the OFF icon colour, faded</span></div>
+					<sdpi-item label="Background"><sdpi-color setting="offlineColor" default="#000000"></sdpi-color></sdpi-item>
+					<sdpi-item label="Icon strength %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
+				</div>
+
+				<div data-show="gauge">
+					<div class="group first">Background</div>
+					<sdpi-item label="Colour"><sdpi-color setting="bgColor" default="#000000"></sdpi-color></sdpi-item>
+
+					<div class="group">Gauge <span>the fuel segments, by level</span></div>
+					<sdpi-item label="Normal"><sdpi-color setting="gaugeColor" default="#3fd0c9"></sdpi-color></sdpi-item>
+					<sdpi-item label="Warning"><sdpi-color setting="warnColor" default="#f2c230"></sdpi-color></sdpi-item>
+					<sdpi-item label="Critical"><sdpi-color setting="alertColor" default="#ff4f4f"></sdpi-color></sdpi-item>
+
+					<div class="group">Pips</div>
+					<sdpi-item label="Colour"><sdpi-color setting="pipColor" default="#ffffff"></sdpi-color></sdpi-item>
+
+					<div class="group">Icon</div>
+					<sdpi-item label="Colour"><sdpi-color setting="iconColor" default="#ffffff"></sdpi-color></sdpi-item>
+					<sdpi-item label="Follow level">
+						<sdpi-checkbox setting="iconFollows" default="false" label="Use the gauge colour instead (changes with the level)"></sdpi-checkbox>
+					</sdpi-item>
+
+					<div class="group">Text <span>styles that show it</span></div>
+					<sdpi-item label="Value (%)"><sdpi-color setting="textColor" default="#3fd0c9"></sdpi-color></sdpi-item>
+					<sdpi-item label="Messages"><sdpi-color setting="msgColor" default="#ffffff" title="ENG OFF, QT OFF, --%"></sdpi-color></sdpi-item>
+
+					<div class="group">Faded <span>unlit pips, empty fuel segments, system switched off, and the whole key when offline: each in its own colour at this strength</span></div>
+					<sdpi-item label="Strength %"><sdpi-range setting="offlineOpacity" min="0" max="100" step="5" default="20" showlabels></sdpi-range></sdpi-item>
+				</div>
+			</details>
+		</div>
+
+		<!-- ===== Title text and images (status, power) ===== -->
+		<div data-show="status power">
+			<details>
+				<summary>Title text and own images</summary>
+				<div class="group first">Title text <span>used when "Show state as title" is ticked</span></div>
+				<sdpi-item label="When ON"><sdpi-textfield setting="onLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="When OFF"><sdpi-textfield setting="offLabel" placeholder="From the button choice"></sdpi-textfield></sdpi-item>
+				<div class="group">Own images <span>replace the whole key; optional</span></div>
+				<sdpi-item label="When ON"><sdpi-file setting="onImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+				<sdpi-item label="When OFF"><sdpi-file setting="offImage" accept="image/png,image/jpeg,image/svg+xml"></sdpi-file></sdpi-item>
+			</details>
+		</div>
+
+		<!-- ===== Advanced ===== -->
+		<div data-show="hotkey status power">
+			<details>
+				<summary>Advanced</summary>
+				<sdpi-item label="Long press ms">
+					<sdpi-range setting="longMs" min="300" max="3000" step="100" default="1000" showlabels></sdpi-range>
+				</sdpi-item>
+				<div data-show="status:custom">
+					<sdpi-item label="Telemetry field">
+						<sdpi-select setting="field" datasource="getFields" hot-reload show-refresh placeholder="Choose a field"></sdpi-select>
+					</sdpi-item>
+					<sdpi-item label="ON when value is">
+						<sdpi-textfield setting="onValues" placeholder="blank = true / non-zero.  e.g.  DEPLOYED, DEPLOYING"></sdpi-textfield>
+					</sdpi-item>
+					<sdpi-item label="Show value">
+						<sdpi-checkbox setting="showValue" label="Add the live value to the title"></sdpi-checkbox>
+					</sdpi-item>
+				</div>
+			</details>
+		</div>
+		<div data-show="gauge:custom">
+			<details open>
+				<summary>Custom gauge: field and display</summary>
+				<sdpi-item label="Telemetry field">
+					<sdpi-select setting="field" datasource="getNumberFields" hot-reload show-refresh placeholder="Choose a field"></sdpi-select>
+				</sdpi-item>
+				<sdpi-item label="Empty value"><sdpi-textfield setting="min" placeholder="0"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="Full value"><sdpi-textfield setting="max" placeholder="1"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="Show">
+					<sdpi-select setting="display" default="percent">
+						<option value="percent">Percentage</option>
+						<option value="value">Raw value with unit</option>
+					</sdpi-select>
+				</sdpi-item>
+				<sdpi-item label="Unit"><sdpi-textfield setting="unit" placeholder="m/s, G, m…"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="Decimals"><sdpi-textfield setting="decimals" placeholder="0"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="State field">
+					<sdpi-select setting="stateField" datasource="getStateFields" hot-reload show-refresh placeholder="(none)"></sdpi-select>
+				</sdpi-item>
+				<sdpi-item label="ON when value is"><sdpi-textfield setting="stateOnValues" placeholder="blank = true / non-zero"></sdpi-textfield></sdpi-item>
+				<sdpi-item label="Text when OFF"><sdpi-textfield setting="gaugeOffLabel" placeholder="OFF" maxlength="9"></sdpi-textfield></sdpi-item>
+			</details>
+		</div>
+	</body>
+</html>

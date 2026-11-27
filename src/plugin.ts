@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ScGauge } from "./actions/sc-gauge";
 import { ScHotkey } from "./actions/sc-hotkey";
+import { ScKey } from "./actions/sc-key";
 import { TelemetryStatus } from "./actions/telemetry-status";
 import { Keyboard } from "./input/keyboard";
 import { setUserIconDir } from "./render/user-icons";
@@ -35,9 +36,14 @@ streamDeck.logger.info(`SC Telemetry Deck started (log level ${config.debug ? "d
 const telemetry = new TelemetryClient(config, streamDeck.logger);
 const keyboard = new Keyboard(streamDeck.logger);
 
-streamDeck.actions.registerAction(new ScHotkey(telemetry, keyboard));
+// SC Button is the one action in the list; it drives the hotkey and gauge engines. Those are also
+// registered under their old actions (hidden from the list) so keys already on a deck keep working.
+const hotkey = new ScHotkey(telemetry, keyboard);
+const gauge = new ScGauge(telemetry, keyboard);
+streamDeck.actions.registerAction(new ScKey(hotkey, gauge, telemetry));
+streamDeck.actions.registerAction(hotkey);
+streamDeck.actions.registerAction(gauge);
 streamDeck.actions.registerAction(new TelemetryStatus(telemetry, pluginDir));
-streamDeck.actions.registerAction(new ScGauge(telemetry, keyboard));
 
 streamDeck.connect();
 telemetry.start();

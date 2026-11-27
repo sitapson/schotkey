@@ -59,6 +59,8 @@ type HotkeySettings = {
 	pips?: number | string;
 	/** Power icons: pips as a ring around the symbol (default) or a row across the top (like gauge style 8). */
 	pipLayout?: "ring" | "row" | "icon";
+	/** Always draw pips, whatever the icon (set by SC Button for its Power choices). */
+	forcePips?: boolean;
 	/** Icon colour in each state. */
 	onIconColor?: string;
 	offIconColor?: string;
@@ -244,7 +246,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const auto = !settings.icon || settings.icon === "auto";
 		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : auto ? preset?.defaultIcon : undefined;
 		inst.icon = inst.gaugeIcon ? "power" : settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon as HotkeyIcon) ? (settings.icon as HotkeyIcon) : (preset?.icon ?? "power");
-		inst.hasPips = PIP_ICONS.includes(inst.icon) || (!!inst.gaugeIcon && !!preset && PIP_ICONS.includes(preset.icon));
+		inst.hasPips = !!settings.forcePips || PIP_ICONS.includes(inst.icon) || (!!inst.gaugeIcon && !!preset && PIP_ICONS.includes(preset.icon));
 		this.stopCog(inst);
 		try {
 			inst.steps = settings.keys ? parseKeys(settings.keys) : [];
@@ -381,10 +383,10 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		else if (phase === "off" && s.offImage) image = s.offImage;
 		else {
 			const color =
-				phase === "offline" ? (s.offlineColor ?? "#2a3038")
-				: phase === "busy" ? (s.busyColor ?? "#8a6414")
-				: phase === "on" ? (s.onColor ?? "#1f7a3a")
-				: (s.offColor ?? "#3a434d");
+				phase === "offline" ? (s.offlineColor ?? "#000000")
+				: phase === "busy" ? (s.busyColor ?? "#000000")
+				: phase === "on" ? (s.onColor ?? "#000000")
+				: (s.offColor ?? "#000000");
 			const iconColor =
 				phase === "offline" ? (s.offIconColor ?? "#ffffff")
 				: phase === "busy" ? s.busyIconColor
