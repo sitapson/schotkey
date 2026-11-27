@@ -17,6 +17,7 @@
  *   v15 Icon boundary + straight fuel bar and % below.
  *   v16 Icon boundary + pip row on top + fuel bar and % below.
  *   v17 Like v9 with the fuel ring flipped (open at the top, under the pip row) and no %.
+ *   v18 v17 with the icon filling the icon boundary and the ring scaled up around it to match.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -72,8 +73,8 @@ export const GAUGE_ICONS = {
 export type GaugeIcon = keyof typeof GAUGE_ICONS | "none";
 export const isGaugeIcon = (v: unknown): v is GaugeIcon => v === "none" || (typeof v === "string" && Object.hasOwn(GAUGE_ICONS, v));
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
-export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12" | "v13" | "v14" | "v15" | "v16" | "v17";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17"];
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12" | "v13" | "v14" | "v15" | "v16" | "v17" | "v18";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18"];
 
 
 /**
@@ -390,6 +391,16 @@ export function renderGauge(face: GaugeFace): string {
 			const mid: Ring = { cx: 72, cy: 72, r: 38, width: 8 };
 			parts = fuelArc(mid, 45, 270, n, f, face.partial, fuelPaint, true) + pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels);
 			iconDy = 6;
+			showText = false;
+			break;
+		}
+		case "v18": {
+			// v17 scaled about the key's centre so the icon fills the icon boundary (62 / 45.2,
+			// about 1.37x): the ring keeps the same spacing from the icon. Width 10, not a full
+			// 1.37x, so the ring's top ends stay clear of the pip row.
+			const big: Ring = { cx: 72, cy: 72, r: 52, width: 10 };
+			parts = fuelArc(big, 45, 270, n, f, face.partial, fuelPaint, true) + pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels);
+			fitIcon = true;
 			showText = false;
 			break;
 		}
