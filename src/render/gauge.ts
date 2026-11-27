@@ -8,6 +8,9 @@
  *   v6  Ring + line, swapped: pip arc as the ring, a straight fuel bar across the bottom.
  *   v7  v5 flipped: fuel ring open at the top, under the icon; pip row across the top.
  *   v8  Like v7 but the fuel is a shallow 150° arc under the icon.
+ *   v9  All-in-one: pip row on top, smaller fuel ring with the icon inside, % in the ring's gap.
+ *   v10 All-in-one, side by side: pip row on top, icon left, large % right, fuel bar below.
+ *   v11 All-in-one, dome: 180° fuel arc over the icon, % under the icon, pip row at the bottom.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -19,8 +22,8 @@
 
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
-export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8"];
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"];
 
 export interface GaugeFace {
 	style?: GaugeStyle;
@@ -220,6 +223,12 @@ export function renderGauge(face: GaugeFace): string {
 	let showText = true;
 	let iconScale = 1;
 	let iconDy = 0; // move the icon down, for layouts with the pips on top
+	let iconDx = 0;
+	// Value text placement; the all-in-one layouts move and resize it.
+	let textX = 72;
+	let textY = 130;
+	let textSize: number | undefined;
+	let textAnchor = "middle";
 	const ring: Ring = { cx: 72, cy: 66, r: 44, width: 9 };
 	const inner: Ring = { cx: 72, cy: 66, r: 32, width: 6 };
 	const lineY = 124;
@@ -259,6 +268,38 @@ export function renderGauge(face: GaugeFace): string {
 			showText = false;
 			break;
 		}
+		case "v9": {
+			// Pips across the top; a smaller fuel ring below with the icon inside and the % in its gap.
+			const mid: Ring = { cx: 72, cy: 82, r: 38, width: 8 };
+			parts = fuelArc(mid, 225, 270, n, f, face.partial, fuelPaint) + pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels);
+			iconScale = 0.72;
+			iconDy = 12;
+			textY = 129;
+			textSize = face.valueText.length > 4 ? 15 : 19;
+			break;
+		}
+		case "v10": {
+			// Pips on top, icon on the left, big % on the right, fuel bar across the bottom.
+			parts = pipLine(26, 118, 22, 7, pips.count, pips.filled, pipPaint, pips.levels) + fuelLine(22, 122, 118, 12, n, f, face.partial, fuelPaint);
+			iconScale = 0.66;
+			iconDx = -36;
+			iconDy = 2;
+			textX = 124;
+			textY = 78;
+			textAnchor = "end";
+			textSize = face.valueText.length > 4 ? 16 : face.valueText.length > 3 ? 25 : 30;
+			break;
+		}
+		case "v11": {
+			// A 180° dome of fuel over the icon, the % under the icon, pips across the bottom.
+			const dome: Ring = { cx: 72, cy: 84, r: 52, width: 9 };
+			parts = fuelArc(dome, 270, 180, n, f, face.partial, fuelPaint) + pipLine(30, 114, 126, 7, pips.count, pips.filled, pipPaint, pips.levels);
+			iconScale = 0.7;
+			iconDy = 0;
+			textY = 106;
+			textSize = face.valueText.length > 4 ? 15 : 20;
+			break;
+		}
 	}
 
 	const pulsing = face.pulse !== undefined && !offline;
@@ -266,11 +307,11 @@ export function renderGauge(face: GaugeFace): string {
 	// Icon and text: full strength normally, faded while the system is off, pulsing while it powers on.
 	const iconOpacity = offline ? 1 : pulsing ? face.pulse! : face.inactive ? fade : 1;
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
-	const fontSize = face.valueText.length > 6 ? 21 : 26;
+	const fontSize = textSize ?? (face.valueText.length > 6 ? 21 : 26);
 	const iconTransform =
-		iconScale !== 1 || iconDy ? ` transform="translate(72 ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
+		iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
 	const text = showText
-		? `<text x="72" y="130" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="middle" font-size="${fontSize}" fill="${COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
+		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";
 
 	// A chosen background fills the whole key (outer frame and panel) so it reads as one colour.
