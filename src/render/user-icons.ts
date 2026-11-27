@@ -287,7 +287,20 @@ export function animatedLampSvg(color: string, cx: number, cy: number, size: num
  */
 export function userIconSvg(icon: string, color: string, cx: number, cy: number, size: number): string | null {
 	const file = USER_ICON_FILES[icon];
-	const body = file ? load(file) : null;
+	return file ? fileIconSvg(file, color, cx, cy, size) : null;
+}
+
+/** Where a supplied icon's artwork lands when drawn by fileIconSvg() with the same cx, cy and size. */
+export function fileIconBox(file: string, cx: number, cy: number, size: number): Box | null {
+	if (!load(file)) return null;
+	const b = boxOf(file);
+	const s = size / Math.max(b.w, b.h);
+	return { x: cx - (b.w * s) / 2, y: cy - (b.h * s) / 2, w: b.w * s, h: b.h * s };
+}
+
+/** A supplied icon file (imgs/icons/<file>), its artwork centred at (cx, cy) and fitted to a size×size box. */
+export function fileIconSvg(file: string, color: string, cx: number, cy: number, size: number): string | null {
+	const body = load(file);
 	if (!body) return null;
 	const b = boxOf(file);
 	const s = size / Math.max(b.w, b.h);

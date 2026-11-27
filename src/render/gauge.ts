@@ -27,6 +27,7 @@
  */
 
 import { Box, fitToBoundary } from "./boundary";
+import { fileIconBox, fileIconSvg } from "./user-icons";
 
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
@@ -199,12 +200,28 @@ function pipLine(x0: number, x1: number, y: number, width: number, count: number
 }
 
 // Simple line icons, drawn around (72, 66).
+/** The supplied hydrogen icon, drawn where the hexagon was: centred at (72, 66), 45.2 px tall at most. */
+const HYDROGEN_FILE = "hydrogen.svg";
+const HYDROGEN_AT = { cx: 72, cy: 66, size: 45.2 };
+
+/** Drawn extent of a gauge icon, for fitting it into the icon boundary. */
+function iconBox(kind: GaugeIcon): Box | undefined {
+	if (kind === "hydrogen") {
+		const b = fileIconBox(HYDROGEN_FILE, HYDROGEN_AT.cx, HYDROGEN_AT.cy, HYDROGEN_AT.size);
+		if (b) return b;
+	}
+	return GAUGE_ICON_BOX[kind];
+}
+
 function icon(kind: GaugeIcon, color: string): string {
 	// One stroke-width per element: a repeated attribute makes the SVG invalid and the key blank.
 	const line = (w: number) => `fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
 	const s = line(3.2);
 	switch (kind) {
 		case "hydrogen": {
+			// The supplied hydrogen.svg, sized like the original hexagon; the hexagon if it's missing.
+			const supplied = fileIconSvg(HYDROGEN_FILE, color, HYDROGEN_AT.cx, HYDROGEN_AT.cy, HYDROGEN_AT.size);
+			if (supplied) return supplied;
 			const hex = [0, 60, 120, 180, 240, 300]
 				.map((a) => {
 					const t = ((a - 90) * Math.PI) / 180;
@@ -364,7 +381,7 @@ export function renderGauge(face: GaugeFace): string {
 	const iconOpacity = offline ? 1 : pulsing ? face.pulse! : 1;
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
 	const fontSize = textSize ?? (face.valueText.length > 6 ? 21 : 26);
-	const box = GAUGE_ICON_BOX[face.icon];
+	const box = iconBox(face.icon);
 	const iconTransform =
 		fitIcon && box
 			? ` transform="${fitToBoundary(box)}"`
