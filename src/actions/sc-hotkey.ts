@@ -67,13 +67,14 @@ type HotkeySettings = {
 type Phase = HotkeyPhase;
 
 /** Working animation: ~12 frames a second. The cog turns 10° a frame. */
-const COG_FRAME_MS = 80;
-const COG_STEP = 10;
+// 25 frames a second, so short switch animations still get several frames; same cog speed as before.
+const COG_FRAME_MS = 40;
+const COG_STEP = 5;
 /** Landing gear swing: timed, since the game only says DEPLOYING / RETRACTING, not how far along. */
 const GEAR_SWING_MS = 1000;
 const GEAR_UP_ANGLE = -85;
-/** Lights and doors: how long the switch animation runs. */
-const SWITCH_MS = 1000;
+/** How long the switch animation runs: doors swing slowly, lights and LAMP snap on and off. */
+const SWITCH_MS: Partial<Record<HotkeyIcon, number>> = { doors: 1000, lights: 200, lamp: 200 };
 /** Icons that animate between their OFF and ON pose when the state flips. */
 const SWITCH_ICONS: HotkeyIcon[] = ["lights", "doors", "lamp"];
 /** Power icons draw a ring of pips. The game doesn't report pip levels, so ON shows this share lit. */
@@ -300,7 +301,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		const pulse = inst.pendingSince !== undefined ? pulseAt(inst.pendingSince) : undefined;
 		if (pulse !== undefined) animating = true;
 		if (SWITCH_ICONS.includes(inst.icon) && (phase === "on" || phase === "off")) {
-			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / SWITCH_MS);
+			const t = inst.flipSince === undefined ? 1 : Math.min(1, (Date.now() - inst.flipSince) / (SWITCH_MS[inst.icon] ?? 1000));
 			const eased = 0.5 - 0.5 * Math.cos(Math.PI * t);
 			switchAmount = phase === "on" ? eased : 1 - eased;
 			animating = t < 1;
