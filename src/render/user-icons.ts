@@ -233,10 +233,10 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 }
 
 /**
- * The "row" pip layout, matching SC Gauge style 8 (render/gauge.ts v9): a straight row of rounded
- * pips across the top (x 30-114, y 20, 7 px thick, 8 px gaps) and the symbol at that style's icon
- * size and place, centred at (72, 82), about 46 px tall. The file's box still includes the room
- * the original corner bars took, and the symbol is about 60% of it, so the box is scaled to 78 px.
+ * The "row" pip layout: a straight row of rounded pips across the top like SC Gauge style 8
+ * (render/gauge.ts v9: x 30-114, y 20, 7 px thick, 8 px gaps), and the symbol large and centred
+ * on the key, about 62 px tall. The file's box still includes the room the original corner bars
+ * took, and the symbol is about 60% of it, so the box is scaled to 104 px.
  */
 function pipRowSvg(file: string, symbol: string, color: string, count: number, filled: number): string {
 	const X0 = 30, X1 = 114, Y = 20, WIDTH = 7, GAP = 8;
@@ -250,7 +250,7 @@ function pipRowSvg(file: string, symbol: string, color: string, count: number, f
 		const d = b > a ? `M${a.toFixed(2)} ${Y}H${b.toFixed(2)}` : `M${a.toFixed(2)} ${Y}h0.01`;
 		row += `<path d="${d}" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${i < filled ? "" : ` opacity="0.28"`}/>`;
 	}
-	const CX = 72, CY = 82, SIZE = 78;
+	const CX = 72, CY = 72, SIZE = 104;
 	const bx = boxOf(file);
 	const s = SIZE / Math.max(bx.w, bx.h);
 	const tx = CX - (bx.x + bx.w / 2) * s;
