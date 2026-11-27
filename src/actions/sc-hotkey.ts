@@ -22,6 +22,7 @@ import { TelemetryClient } from "../telemetry/client";
 import type { Leaf } from "../telemetry/flatten";
 import { formatValue } from "../render/key-image";
 import { renderHotkey, HotkeyPhase } from "../render/hotkey-face";
+import { GaugeIcon, isGaugeIcon } from "../render/gauge";
 import { HotkeyIcon, HOTKEY_ICONS } from "../render/icons";
 import { headingOn, isOn, isTransition, stateWord } from "./on-off";
 import { HOTKEY_PRESETS } from "../presets";
@@ -48,7 +49,8 @@ type HotkeySettings = {
 	/** Show the state ("GEAR DOWN", "DEPLOYING"…) as the key's Stream Deck title. */
 	stateTitle?: boolean;
 	/** "auto" (default) = the preset's icon. */
-	icon?: HotkeyIcon | "auto";
+	/** A hotkey icon, "g:<id>" for one from the gauge icon list, or "auto" (the button's own). */
+	icon?: HotkeyIcon | `g:${string}` | "auto";
 	/** Background while a system is moving (DEPLOYING, RETRACTING…). */
 	busyColor?: string;
 	/** Background when there's no telemetry for this button. */
@@ -119,6 +121,8 @@ interface Instance {
 	pressSeq: number;
 	changedSincePress: boolean;
 	icon: HotkeyIcon;
+	/** Chosen from the gauge icon list: drawn still, so `icon` is left as a plain "power" (no animation or pips). */
+	gaugeIcon?: GaugeIcon;
 	cogAngle: number;
 	cogTimer?: NodeJS.Timeout;
 	/** Title last set by the plugin; undefined = the user's own title. */
@@ -234,7 +238,9 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 		inst.settings = preset
 			? { ...settings, field: preset.field, onValues: preset.onValues ?? "", onLabel: settings.onLabel || preset.onLabel, offLabel: settings.offLabel || preset.offLabel }
 			: settings;
-		inst.icon = settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon) ? settings.icon : (preset?.icon ?? "power");
+		const gaugeIcon = settings.icon?.startsWith("g:") ? settings.icon.slice(2) : undefined;
+		inst.gaugeIcon = isGaugeIcon(gaugeIcon) && gaugeIcon !== "none" ? gaugeIcon : undefined;
+		inst.icon = inst.gaugeIcon ? "power" : settings.icon && settings.icon !== "auto" && HOTKEY_ICONS.includes(settings.icon as HotkeyIcon) ? (settings.icon as HotkeyIcon) : (preset?.icon ?? "power");
 		this.stopCog(inst);
 		try {
 			inst.steps = settings.keys ? parseKeys(settings.keys) : [];
@@ -383,7 +389,7 @@ export class ScHotkey extends SingletonAction<HotkeySettings> {
 			const pipCount = Math.max(1, Math.min(12, Math.round(Number(s.pips ?? 4)) || 4));
 			const pips = PIP_ICONS.includes(inst.icon) ? { count: pipCount, filled: phase === "on" ? Math.round(pipCount * PIPS_LIT_WHEN_ON) : 0, layout: s.pipLayout === "row" || s.pipLayout === "icon" ? s.pipLayout : ("ring" as const), color: phase === "on" ? s.onPipColor : s.offPipColor } : undefined;
 			const iconOpacity = phase === "offline" ? offlineOpacityOf(s.offlineOpacity) : pulse;
-			image = renderHotkey({ phase, icon: inst.icon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
+			image = renderHotkey({ phase, icon: inst.icon, gaugeIcon: inst.gaugeIcon, color, iconColor, iconOpacity, pips, live, cogAngle: inst.cogAngle, gearAngle, switchAmount });
 		}
 
 		if (image === inst.lastFace) return; // nothing changed; don't spam the device

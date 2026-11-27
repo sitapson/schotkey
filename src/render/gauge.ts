@@ -258,6 +258,12 @@ function iconBox(kind: GaugeIcon): Box | undefined {
 	return GAUGE_ICON_BOX[kind];
 }
 
+/** A gauge icon on its own, filling the icon boundary (used by SC Hotkey keys). */
+export function gaugeIconInBoundary(kind: GaugeIcon, color: string): string {
+	const box = iconBox(kind);
+	return box ? `<g transform="${fitToBoundary(box)}">${icon(kind, color)}</g>` : icon(kind, color);
+}
+
 // Line icons drawn around (72, 66); supplied icons from imgs/icons in the same place.
 function icon(kind: GaugeIcon, color: string): string {
 	// One stroke-width per element: a repeated attribute makes the SVG invalid and the key blank.

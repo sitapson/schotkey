@@ -2,6 +2,7 @@
  * Key face for SC Hotkey: the icon alone on a background coloured by state. No text: the
  * state can be shown as the key's Stream Deck title instead (the "Show state as title" option).
  */
+import { GaugeIcon, gaugeIconInBoundary } from "./gauge";
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
 import { animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, PipLayout, pipIconSvg } from "./user-icons";
 
@@ -10,6 +11,8 @@ export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 export interface HotkeyFace {
 	phase: HotkeyPhase;
 	icon: HotkeyIcon;
+	/** An icon from the gauge list chosen instead: drawn still (no animation or pips), filling the icon boundary. */
+	gaugeIcon?: GaugeIcon;
 	/** Background for this phase. */
 	color: string;
 	/** Icon colour for this phase (default white). */
@@ -41,7 +44,7 @@ export function renderHotkey(face: HotkeyFace): string {
 		: face.icon === "lamp" ? animatedLampSvg(fg, 72, 72, 80, a)
 		: null;
 	const pipped = face.pips ? pipIconSvg(face.icon, fg, face.pips.count, face.pips.filled, face.pips.layout, face.pips.color ?? fg) : null;
-	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : iconSvg(face.icon, fg, 72, 72, 80));
+	const art = gear ?? switched ?? pipped ?? (face.phase === "busy" ? cogSvg(fg, 72, 72, 76, face.cogAngle ?? 0, face.color) : face.gaugeIcon ? gaugeIconInBoundary(face.gaugeIcon, fg) : iconSvg(face.icon, fg, 72, 72, 80));
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">` +
 		`<rect width="144" height="144" fill="#12171d"/>` +
