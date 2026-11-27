@@ -47,10 +47,11 @@ function translate(s: KeySettings): JsonObject {
 	const def = BUTTONS[s.button ?? ""] ?? BUTTONS.hotkey;
 	const keys = s.keys ?? def.keys;
 	if (def.kind === "gauge") {
-		return { ...s, preset: def.preset ?? "custom", keys, icon: s.gaugeIcon && s.gaugeIcon !== "auto" ? s.gaugeIcon : "auto", offLabel: (s.gaugeOffLabel as string | undefined) ?? "" };
+		return { ...s, preset: def.preset ?? "custom", keys, icon: s.gaugeIcon && s.gaugeIcon !== "auto" ? s.gaugeIcon : "auto", offLabel: (s.gaugeOffLabel as string | undefined) ?? "", verify: true };
 	}
 	const icon = s.icon && s.icon !== "auto" ? s.icon : (def.icon ?? "auto");
-	const out: JsonObject = { ...s, preset: def.preset ?? "custom", keys, icon, pressMode: s.pressMode ?? def.pressMode ?? "tap" };
+	// "Check it worked" (warn if a press changed nothing) is always on: there is no toggle.
+	const out: JsonObject = { ...s, preset: def.preset ?? "custom", keys, icon, pressMode: s.pressMode ?? def.pressMode ?? "tap", verify: true };
 	// A plain hotkey never reads the game, even if a field was set under another choice.
 	if (def.kind === "hotkey") out.field = "";
 	if (def.kind === "power") out.forcePips = true;
@@ -130,7 +131,7 @@ export class ScKey extends SingletonAction<KeySettings> {
 		if (!changed && s.keys !== undefined) return s;
 		const next: KeySettings = { ...s, keys: def.keys, pressMode: def.pressMode ?? "tap" };
 		if (changed) {
-			next.icon = "auto";
+			next.icon = def.kind === "hotkey" ? (def.icon ?? "power") : "auto";
 			next.gaugeIcon = "auto";
 		}
 		await ev.action.setSettings(next);

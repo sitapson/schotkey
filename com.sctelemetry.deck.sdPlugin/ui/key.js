@@ -1,26 +1,38 @@
 /**
- * SC Button settings panel: show only the settings that apply to the chosen button.
- * Elements carry data-show="kinds or choices", e.g. "status power" or "gauge:custom";
- * the choice "power:engines" is kind "power". Nothing but the dropdown shows until a choice is made.
+ * SC Button settings panel: show only the settings that apply.
+ *  - data-show="kinds or choices", e.g. "status power" or "gauge:custom": shown for those button
+ *    choices ("power:engines" is kind "power"). Nothing but the dropdown shows until a choice is made.
+ *  - data-press="long": also needs that Press option (e.g. the Long press ms slider).
  */
 (() => {
-	function apply(choice) {
+	const state = { button: undefined, pressMode: "tap" };
+
+	function apply() {
+		const choice = state.button;
 		const kind = (choice || "").split(":")[0];
 		for (const el of document.querySelectorAll("[data-show]")) {
 			const list = el.dataset.show.split(/\s+/);
-			el.style.display = choice && (list.includes(kind) || list.includes(choice)) ? "block" : "none";
+			let show = !!choice && (list.includes(kind) || list.includes(choice));
+			if (show && el.dataset.press) show = el.dataset.press === state.pressMode;
+			el.style.display = show ? "block" : "none";
 		}
 	}
-	let shown;
-	const update = (v) => {
-		if (v === shown) return;
-		shown = v;
-		apply(v);
-	};
-	const [get] = window.SDPIComponents.useSettings("button", update, 0);
-	apply(undefined);
-	get().then(update);
-	// A change made in this panel isn't echoed back as a settings event, so also check the stored
-	// choice regularly (it's updated as soon as the dropdown changes).
-	setInterval(() => get().then(update), 300);
+
+	function watch(key, fallback) {
+		const update = (v) => {
+			const value = v ?? fallback;
+			if (value === state[key]) return;
+			state[key] = value;
+			apply();
+		};
+		const [get] = window.SDPIComponents.useSettings(key, update, 0);
+		get().then(update);
+		// A change made in this panel isn't echoed back as a settings event, so also check the
+		// stored value regularly (it's updated as soon as the control changes).
+		setInterval(() => get().then(update), 300);
+	}
+
+	apply();
+	watch("button", undefined);
+	watch("pressMode", "tap");
 })();

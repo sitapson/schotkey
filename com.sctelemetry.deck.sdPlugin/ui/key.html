@@ -85,8 +85,67 @@
 			</sdpi-item>
 		</div>
 
-		<!-- ===== Icon (hotkey, status, power) ===== -->
-		<div data-show="hotkey status power">
+		<!-- ===== Icon (plain hotkey: no button choice to follow) ===== -->
+		<div data-show="hotkey">
+			<sdpi-item label="Icon">
+				<sdpi-select setting="icon" default="power">
+					<optgroup label="Animated">
+						<option value="gear">Landing gear</option>
+						<option value="lights">Headlights</option>
+						<option value="doors">Doors</option>
+						<option value="lamp">LAMP</option>
+					</optgroup>
+					<optgroup label="Fuel and vitals">
+						<option value="g:hydrogen">Hydrogen</option>
+						<option value="g:hexagon">Hydrogen (hexagon)</option>
+						<option value="g:quantum">Quantum (atom)</option>
+						<option value="g:boost">Boost</option>
+						<option value="g:oxygen">Oxygen</option>
+						<option value="g:health">Health</option>
+					</optgroup>
+					<optgroup label="Power">
+						<option value="shippower">Ship power (with pips)</option>
+						<option value="g:power-plant-01">Power plant</option>
+						<option value="g:power-plant-02">Power plant 2</option>
+						<option value="g:engines">Engines (thrust)</option>
+						<option value="g:power-engines">Engines</option>
+						<option value="shields">Shields (with pips)</option>
+						<option value="g:power-weapons">Weapons</option>
+						<option value="g:power-coolers">Coolers</option>
+						<option value="g:power-quantum">Quantum drive</option>
+						<option value="g:power-life-support">Life support</option>
+						<option value="g:power-gravity">Gravity</option>
+					</optgroup>
+					<optgroup label="Ship">
+						<option value="g:vtol">VTOL</option>
+						<option value="coupled">Coupled</option>
+						<option value="g:config">Cycle configuration</option>
+					</optgroup>
+					<optgroup label="Other">
+						<option value="g:comms">Comms</option>
+						<option value="g:pip">Ship marker</option>
+						<option value="g:tobii">Head tracking</option>
+						<option value="g:mirai">Mirai logo</option>
+					</optgroup>
+					<optgroup label="Line icons">
+						<option value="engines">Jet engine</option>
+						<option value="weapons">Crosshair</option>
+						<option value="coolers">Snowflake</option>
+						<option value="quantum">Atom</option>
+						<option value="boost">Chevrons</option>
+						<option value="vtol">VTOL (line)</option>
+						<option value="cruise">Cruise control</option>
+						<option value="limiter">Speed limiter</option>
+						<option value="gsafe">G-safe</option>
+						<option value="gimbals">Gimbals</option>
+						<option value="power">Power symbol</option>
+					</optgroup>
+				</sdpi-select>
+			</sdpi-item>
+		</div>
+
+				<!-- ===== Icon (status, power) ===== -->
+		<div data-show="status power">
 			<sdpi-item label="Icon">
 				<sdpi-select setting="icon" default="auto">
 					<option value="auto">From the button choice</option>
@@ -216,11 +275,16 @@
 		<div data-show="hotkey status power">
 			<sdpi-item label="Press">
 				<sdpi-select setting="pressMode" default="tap">
-					<option value="tap">Tap</option>
-					<option value="hold">Hold while pressed</option>
-					<option value="long">Long press</option>
+					<option value="tap">Press</option>
+					<option value="long">Long Press</option>
+					<option value="hold">Hold</option>
 				</sdpi-select>
 			</sdpi-item>
+			<div data-show="hotkey status power" data-press="long">
+				<sdpi-item label="Long press ms">
+					<sdpi-range setting="longMs" min="300" max="3000" step="100" default="1000" showlabels></sdpi-range>
+				</sdpi-item>
+			</div>
 		</div>
 		<div data-show="status power">
 			<sdpi-item label="Only press if">
@@ -229,11 +293,6 @@
 					<option value="on">Not already ON</option>
 					<option value="off">Not already OFF</option>
 				</sdpi-select>
-			</sdpi-item>
-		</div>
-		<div data-show="status power gauge">
-			<sdpi-item label="Check it worked">
-				<sdpi-checkbox setting="verify" default="true" label="Show ⚠ if the press changed nothing"></sdpi-checkbox>
 			</sdpi-item>
 		</div>
 		<div data-show="status power">
@@ -264,7 +323,6 @@
 				<summary>Colours</summary>
 
 				<div data-show="hotkey">
-					<div class="group first">Key</div>
 					<sdpi-item label="Background"><sdpi-color setting="offColor" default="#000000"></sdpi-color></sdpi-item>
 					<sdpi-item label="Icon"><sdpi-color setting="offIconColor" default="#ffffff"></sdpi-color></sdpi-item>
 				</div>
@@ -333,12 +391,9 @@
 		</div>
 
 		<!-- ===== Advanced ===== -->
-		<div data-show="hotkey status power">
-			<details>
-				<summary>Advanced</summary>
-				<sdpi-item label="Long press ms">
-					<sdpi-range setting="longMs" min="300" max="3000" step="100" default="1000" showlabels></sdpi-range>
-				</sdpi-item>
+		<div data-show="status:custom">
+			<details open>
+				<summary>Custom field</summary>
 				<div data-show="status:custom">
 					<sdpi-item label="Telemetry field">
 						<sdpi-select setting="field" datasource="getFields" hot-reload show-refresh placeholder="Choose a field"></sdpi-select>
