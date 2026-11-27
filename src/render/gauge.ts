@@ -12,6 +12,10 @@
  *   v10 All-in-one, side by side: pip row on top, icon left, large % right, fuel bar below.
  *   v11 All-in-one, dome: 180° fuel arc over the icon, % under the icon, pip row at the bottom.
  *   v12 Like v9, stacked: pip row on top, icon centred, straight fuel bar, % below.
+ *   v13 Icon boundary: the icon alone, filling the icon boundary (ICON_BOUNDARY).
+ *   v14 Icon boundary + pip row on top.
+ *   v15 Icon boundary + straight fuel bar and % below.
+ *   v16 Icon boundary + pip row on top + fuel bar and % below.
  *
  * Colours: background, gauge (normal / low / critical), pips and icon are each set separately.
  * One "fade" strength (0-1) is used for everything dim: unlit pips, empty fuel segments, the
@@ -22,10 +26,25 @@
  * are lit (66% when the system is on, none when off).
  */
 
+import { Box, fitToBoundary } from "./boundary";
+
 export type GaugeIcon = "hydrogen" | "quantum" | "boost" | "oxygen" | "health" | "none";
 // "v2" (pips on top, curved fuel bar below) was removed; keys still set to it fall back to v1.
-export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12";
-export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"];
+export type GaugeStyle = "v1" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "v9" | "v10" | "v11" | "v12" | "v13" | "v14" | "v15" | "v16";
+export const GAUGE_STYLES: GaugeStyle[] = ["v1", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16"];
+
+
+/**
+ * Drawn extent of each built-in gauge icon (outline stroke included), in the 144 px key space.
+ * Measured in a browser; quantum's height worked out from its rotated ellipses.
+ */
+const GAUGE_ICON_BOX: Partial<Record<GaugeIcon, Box>> = {
+	hydrogen: { x: 52.2, y: 43.4, w: 39.6, h: 45.2 },
+	quantum: { x: 48.4, y: 44.9, w: 47.2, h: 42.2 },
+	boost: { x: 56.4, y: 52.4, w: 37.2, h: 27.2 },
+	oxygen: { x: 54.4, y: 51.4, w: 35.2, h: 32.2 },
+	health: { x: 53.4, y: 50, w: 37.2, h: 33.6 },
+};
 
 export interface GaugeFace {
 	style?: GaugeStyle;
@@ -181,7 +200,9 @@ function pipLine(x0: number, x1: number, y: number, width: number, count: number
 
 // Simple line icons, drawn around (72, 66).
 function icon(kind: GaugeIcon, color: string): string {
-	const s = `fill="none" stroke="${color}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"`;
+	// One stroke-width per element: a repeated attribute makes the SVG invalid and the key blank.
+	const line = (w: number) => `fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+	const s = line(3.2);
 	switch (kind) {
 		case "hydrogen": {
 			const hex = [0, 60, 120, 180, 240, 300]
@@ -197,9 +218,9 @@ function icon(kind: GaugeIcon, color: string): string {
 		case "boost":
 			return `<path d="M58 54l10 12-10 12M70 54l10 12-10 12M82 54l10 12-10 12" ${s}/>`;
 		case "oxygen":
-			return `<circle cx="68" cy="65" r="12" ${s}/><path d="M80 74h8l-7.5 8h7.5" ${s} stroke-width="2.6"/>`;
+			return `<circle cx="68" cy="65" r="12" ${s}/><path d="M80 74h8l-7.5 8h7.5" ${line(2.6)}/>`;
 		case "health":
-			return `<path d="M72 82s-17-9.5-17-21a9 9 0 0 1 17-4.5A9 9 0 0 1 89 61c0 11.5-17 21-17 21z" ${s}/><path d="M64 66h5l2.5-5 4 9 2.5-4H81" ${s} stroke-width="2.4"/>`;
+			return `<path d="M72 82s-17-9.5-17-21a9 9 0 0 1 17-4.5A9 9 0 0 1 89 61c0 11.5-17 21-17 21z" ${s}/><path d="M64 66h5l2.5-5 4 9 2.5-4H81" ${line(2.4)}/>`;
 		default:
 			return "";
 	}
@@ -228,6 +249,7 @@ export function renderGauge(face: GaugeFace): string {
 	let iconScale = 1;
 	let iconDy = 0; // move the icon down, for layouts with the pips on top
 	let iconDx = 0;
+	let fitIcon = false; // scale and centre the icon into the icon boundary
 	// Value text placement; the all-in-one layouts move and resize it.
 	let textX = 72;
 	let textY = 130;
@@ -311,6 +333,28 @@ export function renderGauge(face: GaugeFace): string {
 			textY = 129;
 			textSize = face.valueText.length > 4 ? 15 : 19;
 			break;
+		// Icon-boundary styles: the icon fills the fixed icon boundary; parts go around it.
+		case "v13":
+			fitIcon = true;
+			showText = false;
+			break;
+		case "v14":
+			parts = pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels);
+			fitIcon = true;
+			showText = false;
+			break;
+		case "v15":
+			parts = fuelLine(24, 120, 115, 8, n, f, face.partial, fuelPaint);
+			fitIcon = true;
+			textY = 135;
+			textSize = face.valueText.length > 4 ? 14 : 16;
+			break;
+		case "v16":
+			parts = pipLine(30, 114, 20, 7, pips.count, pips.filled, pipPaint, pips.levels) + fuelLine(24, 120, 115, 8, n, f, face.partial, fuelPaint);
+			fitIcon = true;
+			textY = 135;
+			textSize = face.valueText.length > 4 ? 14 : 16;
+			break;
 	}
 
 	const pulsing = face.pulse !== undefined && !offline;
@@ -320,8 +364,11 @@ export function renderGauge(face: GaugeFace): string {
 	const iconOpacity = offline ? 1 : pulsing ? face.pulse! : 1;
 	const textOpacity = offline ? 1 : face.inactive ? fade : 1;
 	const fontSize = textSize ?? (face.valueText.length > 6 ? 21 : 26);
+	const box = GAUGE_ICON_BOX[face.icon];
 	const iconTransform =
-		iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
+		fitIcon && box
+			? ` transform="${fitToBoundary(box)}"`
+			: iconScale !== 1 || iconDy || iconDx ? ` transform="translate(${72 + iconDx} ${66 + iconDy}) scale(${iconScale}) translate(-72 -66)"` : "";
 	const text = showText
 		? `<text x="${textX}" y="${textY}" font-family="Segoe UI, Arial, sans-serif" font-weight="700" text-anchor="${textAnchor}" font-size="${fontSize}" fill="${user.text ?? COLORS.text}"${op(textOpacity)}>${esc(face.valueText)}</text>`
 		: "";

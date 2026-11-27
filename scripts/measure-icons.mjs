@@ -9,6 +9,8 @@ import { execFileSync } from "node:child_process";
 
 const dir = "com.sctelemetry.deck.sdPlugin/imgs/icons";
 const files = readdirSync(dir).filter((f) => f.endsWith(".svg"));
+// Icons drawn with pips (src/render/user-icons.ts PIP_ICON_FILES).
+const SYMBOL_FILES = ["power.svg", "power-shields.svg"];
 const browser = [
 	"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
 	"C:/Program Files/Microsoft/Edge/Application/msedge.exe",
@@ -28,6 +30,13 @@ for (const d of document.querySelectorAll("div[data-f]")) {
   svg.appendChild(g);
   const b = g.getBBox();
   out[d.dataset.f] = { x: +b.x.toFixed(2), y: +b.y.toFixed(2), w: +b.width.toFixed(2), h: +b.height.toFixed(2) };
+  // Power icons: their first four paths are the corner bars, which the plugin replaces with
+  // pips. Also record the symbol alone ("file#symbol") so it can fill the icon boundary.
+  if (${JSON.stringify(SYMBOL_FILES)}.includes(d.dataset.f)) {
+    [...g.querySelectorAll("path")].slice(0, 4).forEach((p) => p.remove());
+    const s = g.getBBox();
+    out[d.dataset.f + "#symbol"] = { x: +s.x.toFixed(2), y: +s.y.toFixed(2), w: +s.width.toFixed(2), h: +s.height.toFixed(2) };
+  }
 }
 document.getElementById("out").textContent = "BOUNDS" + JSON.stringify(out) + "END";
 </script></body></html>`;

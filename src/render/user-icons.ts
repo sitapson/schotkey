@@ -5,6 +5,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { Box, fitToBoundary } from "./boundary";
 
 /** Which supplied file replaces which built-in icon. */
 export const USER_ICON_FILES: Record<string, string> = {
@@ -54,12 +55,6 @@ function load(file: string): string | null {
 	return body;
 }
 
-interface Box {
-	x: number;
-	y: number;
-	w: number;
-	h: number;
-}
 let bounds: Record<string, Box> | null = null;
 
 /** The artwork's drawn area on its page (from bounds.json, written by scripts/measure-icons.mjs). */
@@ -194,13 +189,15 @@ export const PIP_ICON_FILES: Record<string, string> = {
 	shields: "power-shields.svg",
 };
 
-export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: "ring" | "row" = "ring"): string | null {
+export type PipLayout = "ring" | "row" | "icon";
+
+export function pipIconSvg(icon: string, color: string, count: number, filled: number, layout: PipLayout = "ring"): string | null {
 	const file = PIP_ICON_FILES[icon];
 	const body = file ? load(file) : null;
 	if (!body) return null;
 	let removed = 0;
 	const symbol = body.replace(/<path\b[\s\S]*?\/>/g, (m) => (removed++ < 4 ? "" : m));
-	if (layout === "row") return pipRowSvg(file, symbol, color, count, filled);
+	if (layout !== "ring") return (layout === "row" ? pipRow(color, count, filled) : "") + boundarySymbol(file, symbol, color);
 
 	// Same arc as SC Gauge (render/gauge.ts): centre (72, 66), radius 44, 9 px wide, 270° sweep
 	// starting bottom-left and open at the bottom. Rounded ends, with GAP degrees of clear space
@@ -232,13 +229,8 @@ export function pipIconSvg(icon: string, color: string, count: number, filled: n
 	return ring + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
-/**
- * The "row" pip layout: a straight row of rounded pips across the top like SC Gauge style 8
- * (render/gauge.ts v9: x 30-114, y 20, 7 px thick, 8 px gaps), and the symbol large and centred
- * on the key, about 62 px tall. The file's box still includes the room the original corner bars
- * took, and the symbol is about 60% of it, so the box is scaled to 104 px.
- */
-function pipRowSvg(file: string, symbol: string, color: string, count: number, filled: number): string {
+/** Pip row across the top, like SC Gauge style 8 (render/gauge.ts v9): x 30-114, y 20, 7 px thick, 8 px gaps. */
+function pipRow(color: string, count: number, filled: number): string {
 	const X0 = 30, X1 = 114, Y = 20, WIDTH = 7, GAP = 8;
 	const n = Math.max(1, Math.min(12, Math.round(count)));
 	const per = (X1 - X0 + GAP) / n;
@@ -250,12 +242,17 @@ function pipRowSvg(file: string, symbol: string, color: string, count: number, f
 		const d = b > a ? `M${a.toFixed(2)} ${Y}H${b.toFixed(2)}` : `M${a.toFixed(2)} ${Y}h0.01`;
 		row += `<path d="${d}" stroke="${color}" stroke-width="${WIDTH}" stroke-linecap="round"${i < filled ? "" : ` opacity="0.28"`}/>`;
 	}
-	const CX = 72, CY = 72, SIZE = 104;
-	const bx = boxOf(file);
-	const s = SIZE / Math.max(bx.w, bx.h);
-	const tx = CX - (bx.x + bx.w / 2) * s;
-	const ty = CY - (bx.y + bx.h / 2) * s;
-	return row + `<g transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
+	return row;
+}
+
+/**
+ * The power symbol (corner bars removed) filling the icon boundary. Sized by the symbol's own
+ * drawn area ("file#symbol" in bounds.json), not the file's, which still counts the bars.
+ */
+function boundarySymbol(file: string, symbol: string, color: string): string {
+	const whole = boxOf(file); // also loads bounds.json
+	const box = bounds?.[file + "#symbol"] ?? whole;
+	return `<g transform="${fitToBoundary(box)}">${symbol.replaceAll("__ICON_COLOR__", color)}</g>`;
 }
 
 /**

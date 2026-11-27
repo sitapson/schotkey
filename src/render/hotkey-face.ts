@@ -3,7 +3,7 @@
  * state can be shown as the key's Stream Deck title instead (the "Show state as title" option).
  */
 import { cogSvg, HotkeyIcon, iconSvg } from "./icons";
-import { animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, pipIconSvg } from "./user-icons";
+import { animatedDoorsSvg, animatedGearSvg, animatedLampSvg, animatedLightsSvg, PipLayout, pipIconSvg } from "./user-icons";
 
 export type HotkeyPhase = "on" | "off" | "busy" | "offline";
 
@@ -25,7 +25,7 @@ export interface HotkeyFace {
 	/** Lights / doors: how far switched (0 = off / shut, 1 = on / open). Drawn instead of the static icon. */
 	switchAmount?: number;
 	/** Power icons: the pip ring around the symbol. */
-	pips?: { count: number; filled: number; layout?: "ring" | "row" };
+	pips?: { count: number; filled: number; layout?: PipLayout };
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
